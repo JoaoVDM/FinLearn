@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FinLearn — Aprenda o Mercado Financeiro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<nav></nav>
+
+<div class="container">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-text">
+      <h1>Aprenda o <span>Mercado Financeiro</span><br>do zero ao avançado</h1>
+      <p>5 módulos progressivos com lições completas, quizzes interativos e um simulador de juros compostos. Seu progresso é salvo automaticamente.</p>
+      <a href="trilha.html" class="btn btn-primary" style="font-size:0.95rem;padding:12px 24px;">Começar a Aprender →</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-value" id="hero-percent">0%</div>
+        <div class="hero-stat-label">Conclusão</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value" id="hero-completed" style="color:var(--text-secondary)">0</div>
+        <div class="hero-stat-label">Lições feitas</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value" id="hero-total" style="color:var(--text-muted)">—</div>
+        <div class="hero-stat-label">Total de lições</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overall Progress -->
+  <div class="overall-progress-section">
+    <div class="overall-progress-header">
+      <h2>Progresso Geral</h2>
+      <span class="pct" id="overall-pct">0%</span>
+    </div>
+    <div class="progress-bar" style="height:10px">
+      <div class="progress-fill" id="overall-bar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- Modules Grid -->
+  <div>
+    <h2 style="font-size:1.05rem;font-weight:600;color:var(--text-secondary);margin-bottom:16px;text-transform:uppercase;letter-spacing:0.8px;">Módulos</h2>
+    <div class="modules-grid" id="modules-grid">
+      <div class="loading"><div class="spinner"></div> Carregando módulos...</div>
+    </div>
+  </div>
+
+  <!-- Quick Links -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:40px;margin-bottom:40px;padding-top:32px;border-top:1px solid var(--border)">
+    <a href="glossario.html" class="card" style="text-decoration:none;display:flex;align-items:center;gap:16px;">
+      <span style="font-size:2rem">📖</span>
+      <div>
+        <div style="font-weight:700;color:var(--text-primary);margin-bottom:3px">Glossário</div>
+        <div style="font-size:0.82rem;color:var(--text-muted)">30 termos do mercado financeiro</div>
+      </div>
+    </a>
+    <a href="simulador.html" class="card" style="text-decoration:none;display:flex;align-items:center;gap:16px;">
+      <span style="font-size:2rem">📊</span>
+      <div>
+        <div style="font-weight:700;color:var(--text-primary);margin-bottom:3px">Simulador</div>
+        <div style="font-size:0.82rem;color:var(--text-muted)">Calcule o crescimento do seu patrimônio</div>
+      </div>
+    </a>
+    <a href="trilha.html" class="card" style="text-decoration:none;display:flex;align-items:center;gap:16px;">
+      <span style="font-size:2rem">🎯</span>
+      <div>
+        <div style="font-weight:700;color:var(--text-primary);margin-bottom:3px">Quizzes</div>
+        <div style="font-size:0.82rem;color:var(--text-muted)">Teste seus conhecimentos por módulo</div>
+      </div>
+    </a>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

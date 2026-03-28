@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz — FinLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<nav></nav>
+
+<div class="container">
+  <div class="quiz-container" id="quiz-container">
+
+    <div class="quiz-header">
+      <div style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px">Quiz do</div>
+      <h1 id="quiz-module-title">Módulo</h1>
+      <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:8px">Responda as perguntas e veja sua pontuação ao final.</p>
+    </div>
+
+    <div class="quiz-progress-info">
+      <span id="quiz-progress-text">Questão 1 de 5</span>
+      <span id="quiz-score-preview"></span>
+    </div>
+    <div class="progress-bar" style="margin-bottom:28px;height:4px">
+      <div class="progress-fill" id="quiz-progress-bar" style="width:0%"></div>
+    </div>
+
+    <div id="question-card" class="question-card">
+      <div class="loading"><div class="spinner"></div> Carregando quiz...</div>
+    </div>
+
+    <div class="quiz-nav" id="quiz-nav">
+      <button id="next-btn" class="btn btn-primary" style="display:none">Próxima →</button>
+    </div>
+
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
