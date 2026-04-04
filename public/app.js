@@ -9,20 +9,101 @@ const API = '';
 function injectNav() {
   const nav = document.querySelector('nav');
   if (!nav) return;
+
+  const page = location.pathname.split('/').pop() || 'index.html';
+  const active = (p) => page === p ? ' active' : '';
+  const theme = document.documentElement.dataset.theme || 'dark';
+  const themeIcon = theme === 'light' ? '🌙' : '☀️';
+  const themeLabel = theme === 'light' ? 'Escuro' : 'Claro';
+
   nav.innerHTML = `
-    <a href="index.html" class="nav-logo"><span>Fin</span>Learn</a>
-    <div class="nav-right">
-      <ul class="nav-links">
-        <li><a href="index.html"><span>🏠</span> <span>Início</span></a></li>
-        <li><a href="trilha.html"><span>📚</span> <span>Trilha</span></a></li>
-        <li><a href="glossario.html"><span>📖</span> <span>Glossário</span></a></li>
-        <li><a href="simulador.html"><span>📊</span> <span>Simulador</span></a></li>
-      </ul>
+    <div class="sidebar-logo">
+      <a href="index.html" class="nav-logo"><span>Fin</span>Learn</a>
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html" class="${active('index.html')}"><span class="nav-icon">🏠</span> Início</a></li>
+      <li><a href="trilha.html" class="${active('trilha.html')}"><span class="nav-icon">📚</span> Trilha</a></li>
+      <li><a href="glossario.html" class="${active('glossario.html')}"><span class="nav-icon">📖</span> Glossário</a></li>
+      <li><a href="simulador.html" class="${active('simulador.html')}"><span class="nav-icon">📊</span> Simulador</a></li>
+      <li><a href="meta.html" class="${active('meta.html')}"><span class="nav-icon">🎯</span> Meta</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="theme-toggle">
+        <span id="theme-icon">${themeIcon}</span>
+        <span id="theme-label">${themeLabel}</span>
+      </button>
       <div class="nav-streak" id="nav-streak" style="display:none">
-        🔥 <span id="nav-streak-count">0</span>
+        🔥 <span id="nav-streak-count">0</span> dias seguidos
       </div>
     </div>
   `;
+
+  // Mobile header
+  const mobileHeader = document.createElement('div');
+  mobileHeader.className = 'mobile-header';
+  mobileHeader.innerHTML = `
+    <a href="index.html" class="nav-logo"><span>Fin</span>Learn</a>
+    <button class="hamburger-btn" id="hamburger-btn" aria-label="Abrir menu">
+      <span></span><span></span><span></span>
+    </button>
+  `;
+  document.body.prepend(mobileHeader);
+
+  // Overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'sidebar-overlay';
+  overlay.id = 'sidebar-overlay';
+  document.body.appendChild(overlay);
+
+  // Theme toggle
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const current = document.documentElement.dataset.theme || 'dark';
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  });
+
+  // Toggle sidebar
+  document.getElementById('hamburger-btn').addEventListener('click', () => {
+    nav.classList.toggle('open');
+    overlay.classList.toggle('open');
+  });
+  overlay.addEventListener('click', () => {
+    nav.classList.remove('open');
+    overlay.classList.remove('open');
+  });
+  nav.querySelectorAll('.nav-links a').forEach(a => {
+    a.addEventListener('click', () => {
+      nav.classList.remove('open');
+      overlay.classList.remove('open');
+    });
+  });
+}
+
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  localStorage.setItem('fl_theme', theme);
+  const icon = document.getElementById('theme-icon');
+  const label = document.getElementById('theme-label');
+  if (icon) icon.textContent = theme === 'light' ? '🌙' : '☀️';
+  if (label) label.textContent = theme === 'light' ? 'Escuro' : 'Claro';
+  // Update chart colors if simulator chart is visible
+  if (simChart) {
+    const isDark = theme === 'dark';
+    const tickColor = isDark ? '#5a6478' : '#94a3b8';
+    const gridColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)';
+    const legendColor = isDark ? '#8892a4' : '#475569';
+    simChart.options.plugins.legend.labels.color = legendColor;
+    simChart.options.scales.x.ticks.color = tickColor;
+    simChart.options.scales.x.grid.color = gridColor;
+    simChart.options.scales.y.ticks.color = tickColor;
+    simChart.options.scales.y.grid.color = gridColor;
+    simChart.update();
+  }
+}
+
+function initTheme() {
+  // Apply data-theme immediately (before nav injection) to avoid flash
+  const saved = localStorage.getItem('fl_theme') || 'dark';
+  document.documentElement.dataset.theme = saved;
 }
 
 function updateNavStreak(streak) {
@@ -691,6 +772,13 @@ async function initGlossary() {
 let simChart = null;
 let rateMode = 'month';
 
+function calcRequiredMonthly(goal, initial, monthlyRate, months) {
+  if (monthlyRate === 0) return Math.max(0, (goal - initial) / months);
+  const factor = Math.pow(1 + monthlyRate, months);
+  const pmt = (goal - initial * factor) * monthlyRate / (factor - 1);
+  return Math.max(0, pmt);
+}
+
 function initSimulator() {
   const form = document.getElementById('sim-form');
   if (!form) return;
@@ -745,7 +833,6 @@ function initSimulator() {
 
 function calculate() {
   const initial = Math.max(0, parseFloat(document.getElementById('initial').value) || 0);
-  const monthly = Math.max(0, parseFloat(document.getElementById('monthly').value) || 0);
   const rateInput = Math.max(0, parseFloat(document.getElementById('rate').value) || 0);
   const years = Math.max(1, Math.min(50, parseInt(document.getElementById('years').value) || 1));
   const inflation = Math.max(0, parseFloat(document.getElementById('inflation')?.value) || 0);
@@ -758,6 +845,8 @@ function calculate() {
   }
 
   const months = years * 12;
+  const monthly = Math.max(0, parseFloat(document.getElementById('monthly').value) || 0);
+
   let balance = initial;
   let totalInvested = initial;
 
@@ -788,6 +877,92 @@ function calculate() {
   document.getElementById('result-gains').textContent = fmtCurrency(gains);
   const realEl = document.getElementById('result-real');
   if (realEl) realEl.textContent = fmtCurrency(realFinal);
+
+  renderChart(yearlyData);
+  renderTable(yearlyData);
+}
+
+// ========================================
+// META — Calculadora de Meta
+// ========================================
+
+function initMeta() {
+  const form = document.getElementById('meta-form');
+  if (!form) return;
+
+  const monthBtn = document.getElementById('rate-month');
+  const yearBtn = document.getElementById('rate-year');
+  const rateLabel = document.getElementById('rate-label');
+
+  monthBtn.addEventListener('click', () => {
+    rateMode = 'month';
+    monthBtn.classList.add('active');
+    yearBtn.classList.remove('active');
+    rateLabel.textContent = 'Taxa de Juros ao Mês (%)';
+    calculateMeta();
+  });
+
+  yearBtn.addEventListener('click', () => {
+    rateMode = 'year';
+    yearBtn.classList.add('active');
+    monthBtn.classList.remove('active');
+    rateLabel.textContent = 'Taxa de Juros ao Ano (%)';
+    calculateMeta();
+  });
+
+  form.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', calculateMeta);
+  });
+
+  calculateMeta();
+}
+
+function calculateMeta() {
+  const goal    = Math.max(0, parseFloat(document.getElementById('goal').value)      || 0);
+  const initial = Math.max(0, parseFloat(document.getElementById('initial').value)   || 0);
+  const rateInput = Math.max(0, parseFloat(document.getElementById('rate').value)    || 0);
+  const years   = Math.max(1, Math.min(50, parseInt(document.getElementById('years').value) || 1));
+  const inflation = Math.max(0, parseFloat(document.getElementById('inflation').value) || 0);
+
+  let monthlyRate;
+  if (rateMode === 'month') {
+    monthlyRate = rateInput / 100;
+  } else {
+    monthlyRate = Math.pow(1 + rateInput / 100, 1 / 12) - 1;
+  }
+
+  const months = years * 12;
+  const monthly = calcRequiredMonthly(goal, initial, monthlyRate, months);
+
+  let balance = initial;
+  let totalInvested = initial;
+
+  const yearlyData = [{
+    year: 0, balance: initial, invested: initial, gains: 0, realBalance: initial
+  }];
+
+  for (let m = 1; m <= months; m++) {
+    balance = balance * (1 + monthlyRate) + monthly;
+    totalInvested += monthly;
+    if (m % 12 === 0) {
+      const yr = m / 12;
+      yearlyData.push({
+        year: yr,
+        balance,
+        invested: totalInvested,
+        gains: balance - totalInvested,
+        realBalance: balance / Math.pow(1 + inflation / 100, yr)
+      });
+    }
+  }
+
+  const gains = balance - totalInvested;
+  const realFinal = balance / Math.pow(1 + inflation / 100, years);
+
+  document.getElementById('result-monthly').textContent   = fmtCurrency(monthly);
+  document.getElementById('result-invested').textContent  = fmtCurrency(totalInvested);
+  document.getElementById('result-gains').textContent     = fmtCurrency(gains);
+  document.getElementById('result-real').textContent      = fmtCurrency(realFinal);
 
   renderChart(yearlyData);
   renderTable(yearlyData);
@@ -828,7 +1003,6 @@ function renderChart(data) {
           fill: true,
           tension: 0.4,
           borderWidth: 2,
-          borderDash: [6, 3],
           pointRadius: 3,
           pointBackgroundColor: '#3a4460'
         },
@@ -840,7 +1014,6 @@ function renderChart(data) {
           fill: false,
           tension: 0.4,
           borderWidth: 2,
-          borderDash: [3, 3],
           pointRadius: 3,
           pointBackgroundColor: '#ffa502'
         }
@@ -921,6 +1094,7 @@ function setActiveNav() {
 // ========================================
 
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
   injectNav();
   setActiveNav();
   initStreak();
@@ -931,4 +1105,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initQuizNav();
   initGlossary();
   initSimulator();
+  initMeta();
 });

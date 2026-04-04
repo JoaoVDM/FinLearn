@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script>(function(){var t=localStorage.getItem('fl_theme');if(t)document.documentElement.dataset.theme=t;})()</script>
-  <title>Simulador de Juros Compostos — FinLearn</title>
+  <title>Calculadora de Meta — FinLearn</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
@@ -16,35 +16,26 @@
 
 <div class="container">
   <div class="page-header">
-    <h1>📊 Simulador de Juros Compostos</h1>
-    <p>Visualize o crescimento do seu patrimônio com aportes mensais e juros compostos.</p>
+    <h1>🎯 Calculadora de Meta</h1>
+    <p>Defina quanto quer acumular e descubra qual aporte mensal é necessário para chegar lá.</p>
   </div>
 
   <div class="simulator-layout">
 
     <!-- Form -->
-    <form class="sim-form" id="sim-form" onsubmit="return false">
+    <form class="sim-form" id="meta-form" onsubmit="return false">
       <h2>⚙️ Parâmetros</h2>
 
-      <div class="preset-group">
-        <div class="preset-label">Cenários rápidos</div>
-        <div class="preset-btns">
-          <button type="button" class="preset-btn" id="preset-conservador">🛡️ Conservador</button>
-          <button type="button" class="preset-btn" id="preset-moderado">⚖️ Moderado</button>
-          <button type="button" class="preset-btn" id="preset-agressivo">🚀 Agressivo</button>
-        </div>
+      <div class="form-group">
+        <label>Patrimônio Desejado (R$)</label>
+        <input type="number" id="goal" value="500000" min="0" step="10000" placeholder="Ex: 500000" />
+        <div class="form-hint">Quanto você quer acumular ao final do período</div>
       </div>
 
       <div class="form-group">
         <label>Valor Inicial (R$)</label>
         <input type="number" id="initial" value="1000" min="0" step="100" placeholder="Ex: 1000" />
         <div class="form-hint">Quanto você já tem ou vai investir agora</div>
-      </div>
-
-      <div class="form-group">
-        <label>Aporte Mensal (R$)</label>
-        <input type="number" id="monthly" value="500" min="0" step="50" placeholder="Ex: 500" />
-        <div class="form-hint">Quanto você vai investir todo mês</div>
       </div>
 
       <div class="form-group">
@@ -60,7 +51,7 @@
       <div class="form-group">
         <label>Período (anos)</label>
         <input type="number" id="years" value="10" min="1" max="50" step="1" placeholder="Ex: 10" />
-        <div class="form-hint">Por quantos anos você pretende investir</div>
+        <div class="form-hint">Em quantos anos você quer atingir a meta</div>
       </div>
 
       <div class="form-group">
@@ -83,11 +74,11 @@
 
       <div class="result-summary">
         <div class="result-card highlight-card">
-          <div class="result-card-label">Patrimônio Final</div>
-          <div class="result-card-value" id="result-final">R$ 0,00</div>
+          <div class="result-card-label">Aporte Necessário/mês</div>
+          <div class="result-card-value" id="result-monthly">R$ 0,00</div>
         </div>
         <div class="result-card">
-          <div class="result-card-label">Total Investido</div>
+          <div class="result-card-label">Total a Investir</div>
           <div class="result-card-value" id="result-invested">R$ 0,00</div>
         </div>
         <div class="result-card">
@@ -101,7 +92,7 @@
       </div>
 
       <div class="chart-card">
-        <h3>📈 Evolução Patrimonial</h3>
+        <h3>📈 Projeção até a Meta</h3>
         <div style="height:300px;position:relative">
           <canvas id="sim-chart"></canvas>
         </div>
