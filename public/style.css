@@ -183,20 +183,6 @@ nav {
   flex-shrink: 0;
 }
 
-.nav-streak {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #ff6b35;
-  background: rgba(255, 107, 53, 0.08);
-  border: 1px solid rgba(255, 107, 53, 0.2);
-  border-radius: var(--radius);
-  padding: 9px 12px;
-  width: 100%;
-  justify-content: center;
-}
 
 /* ========== MOBILE HEADER ========== */
 .mobile-header {

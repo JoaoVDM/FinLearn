@@ -16,30 +16,10 @@ const content = JSON.parse(fs.readFileSync(CONTENT_FILE, 'utf-8'));
 
 function readData() {
   try {
-    const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
-    if (!data.studyDays) data.studyDays = [];
-    return data;
+    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
   } catch {
-    return { completedLessons: [], quizScores: {}, studyDays: [] };
+    return { completedLessons: [], quizScores: {} };
   }
-}
-
-function calculateStreak(studyDays) {
-  if (!studyDays || studyDays.length === 0) return 0;
-
-  const unique = [...new Set(studyDays)].sort().reverse();
-  const today = new Date().toISOString().split('T')[0];
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-
-  if (unique[0] !== today && unique[0] !== yesterday) return 0;
-
-  let streak = 1;
-  for (let i = 0; i < unique.length - 1; i++) {
-    const diff = (new Date(unique[i]) - new Date(unique[i + 1])) / 86400000;
-    if (diff === 1) streak++;
-    else break;
-  }
-  return streak;
 }
 
 async function writeData(data) {
@@ -76,8 +56,7 @@ app.get('/api/progresso', (req, res) => {
     totalLessons,
     completedCount,
     overallPercent,
-    modulesProgress,
-    streak: calculateStreak(data.studyDays)
+    modulesProgress
   });
 });
 
@@ -90,8 +69,6 @@ app.post('/api/progresso', async (req, res) => {
 
   if (completed && !data.completedLessons.includes(lessonId)) {
     data.completedLessons.push(lessonId);
-    const today = new Date().toISOString().split('T')[0];
-    if (!data.studyDays.includes(today)) data.studyDays.push(today);
   } else if (!completed) {
     data.completedLessons = data.completedLessons.filter(id => id !== lessonId);
   }
@@ -102,7 +79,7 @@ app.post('/api/progresso', async (req, res) => {
 
 // POST /api/progresso/reset
 app.post('/api/progresso/reset', async (req, res) => {
-  await writeData({ completedLessons: [], quizScores: {}, studyDays: [] });
+  await writeData({ completedLessons: [], quizScores: {} });
   res.json({ success: true });
 });
 

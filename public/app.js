@@ -32,9 +32,6 @@ function injectNav() {
         <span id="theme-icon">${themeIcon}</span>
         <span id="theme-label">${themeLabel}</span>
       </button>
-      <div class="nav-streak" id="nav-streak" style="display:none">
-        🔥 <span id="nav-streak-count">0</span> dias seguidos
-      </div>
     </div>
   `;
 
@@ -106,24 +103,6 @@ function initTheme() {
   document.documentElement.dataset.theme = saved;
 }
 
-function updateNavStreak(streak) {
-  const el = document.getElementById('nav-streak');
-  const count = document.getElementById('nav-streak-count');
-  if (!el || !count) return;
-  if (streak > 0) {
-    count.textContent = streak;
-    el.style.display = '';
-  } else {
-    el.style.display = 'none';
-  }
-}
-
-async function initStreak() {
-  // A index page já atualiza o streak dentro de initIndex() — evita chamada duplicada
-  if (document.getElementById('modules-grid')) return;
-  const progress = await api('GET', '/api/progresso');
-  updateNavStreak(progress.streak ?? 0);
-}
 
 // ---- Utility ----
 
@@ -191,7 +170,6 @@ async function initIndex() {
   heroTotal.textContent = progress.totalLessons;
   overallBar.style.width = progress.overallPercent + '%';
   overallPct.textContent = progress.overallPercent + '%';
-  updateNavStreak(progress.streak ?? 0);
 
   // Botão "Continue estudando" — substitui "Começar a Aprender" quando há progresso
   const startBtn = document.getElementById('start-btn');
@@ -217,7 +195,7 @@ async function initIndex() {
 
   // Reset
   document.getElementById('reset-btn')?.addEventListener('click', async () => {
-    if (!confirm('Tem certeza? Todo o progresso, quizzes e streak serão apagados.')) return;
+    if (!confirm('Tem certeza? Todo o progresso e quizzes serão apagados.')) return;
     await api('POST', '/api/progresso/reset');
     location.reload();
   });
@@ -1097,7 +1075,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   injectNav();
   setActiveNav();
-  initStreak();
   initIndex();
   initTrilha();
   initLesson();
