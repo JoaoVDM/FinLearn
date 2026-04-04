@@ -11,13 +11,31 @@ function injectNav() {
   if (!nav) return;
   nav.innerHTML = `
     <a href="index.html" class="nav-logo"><span>Fin</span>Learn</a>
-    <ul class="nav-links">
-      <li><a href="index.html"><span>🏠</span> <span>Início</span></a></li>
-      <li><a href="trilha.html"><span>📚</span> <span>Trilha</span></a></li>
-      <li><a href="glossario.html"><span>📖</span> <span>Glossário</span></a></li>
-      <li><a href="simulador.html"><span>📊</span> <span>Simulador</span></a></li>
-    </ul>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="index.html"><span>🏠</span> <span>Início</span></a></li>
+        <li><a href="trilha.html"><span>📚</span> <span>Trilha</span></a></li>
+        <li><a href="glossario.html"><span>📖</span> <span>Glossário</span></a></li>
+        <li><a href="simulador.html"><span>📊</span> <span>Simulador</span></a></li>
+      </ul>
+      <div class="nav-streak" id="nav-streak" style="display:none">
+        🔥 <span id="nav-streak-count">0</span>
+      </div>
+    </div>
   `;
+}
+
+async function initStreak() {
+  const progress = await api('GET', '/api/progresso');
+  const streak = progress.streak ?? 0;
+  if (streak > 0) {
+    const el = document.getElementById('nav-streak');
+    const count = document.getElementById('nav-streak-count');
+    if (el && count) {
+      count.textContent = streak;
+      el.style.display = '';
+    }
+  }
 }
 
 // ---- Utility ----
@@ -83,6 +101,7 @@ async function initIndex() {
   heroTotal.textContent = progress.totalLessons;
   overallBar.style.width = progress.overallPercent + '%';
   overallPct.textContent = progress.overallPercent + '%';
+
 
   el.innerHTML = '';
   progress.modulesProgress.forEach(m => {
@@ -190,6 +209,7 @@ async function initTrilha() {
   });
 
   if (targetModulo) {
+    // aguarda o DOM renderizar antes de rolar para o módulo alvo
     setTimeout(() => {
       const target = document.getElementById(`modulo-${targetModulo}`);
       if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -239,9 +259,22 @@ async function initLesson() {
   checkLabel.textContent = done ? 'Lição concluída' : 'Marcar como concluída';
 
   checkbox.addEventListener('change', async () => {
-    const res = await api('POST', '/api/progresso', { lessonId: id, completed: checkbox.checked });
+    await api('POST', '/api/progresso', { lessonId: id, completed: checkbox.checked });
     checkLabel.textContent = checkbox.checked ? 'Lição concluída' : 'Marcar como concluída';
     showToast(checkbox.checked ? 'Lição marcada como concluída!' : 'Progresso removido');
+
+    // Atualiza sidebar sem recarregar a página
+    const updatedProgress = await api('GET', '/api/progresso');
+    const modProgress = updatedProgress.modulesProgress?.find(m => m.id === lesson.moduleId);
+    if (modProgress) {
+      document.getElementById('sidebar-progress-bar').style.width = modProgress.percent + '%';
+      document.getElementById('sidebar-progress-text').textContent =
+        `${modProgress.completed}/${modProgress.total} lições (${modProgress.percent}%)`;
+    }
+    const sidebarItem = sidebarList?.querySelector(`a[href="licao.html?id=${id}"]`);
+    if (sidebarItem) {
+      sidebarItem.className = `sidebar-lesson-item active${checkbox.checked ? ' done' : ''}`;
+    }
   });
 
   // Navigation
@@ -301,6 +334,21 @@ let quizState = {
   answered: false
 };
 
+function shuffleOptions(questions) {
+  return questions.map(q => {
+    const indices = q.options.map((_, i) => i);
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    return {
+      ...q,
+      options: indices.map(i => q.options[i]),
+      correct: indices.indexOf(q.correct)
+    };
+  });
+}
+
 async function initQuiz() {
   const container = document.getElementById('quiz-container');
   if (!container) return;
@@ -313,11 +361,40 @@ async function initQuiz() {
   const data = await api('GET', `/api/quiz/${modulo}`);
   if (data.error) { container.innerHTML = '<p>' + data.error + '</p>'; return; }
 
-  quizState.questions = data.questions;
+  quizState.questions = shuffleOptions(data.questions);
   quizState.modulo = modulo;
   quizState.current = 0;
   quizState.answers = [];
   quizState.answered = false;
+
+  renderQuestion();
+}
+
+async function restartQuiz() {
+  const data = await api('GET', `/api/quiz/${quizState.modulo}`);
+  if (!data.questions) return;
+
+  quizState.questions = shuffleOptions(data.questions);
+  quizState.current = 0;
+  quizState.answers = [];
+  quizState.answered = false;
+
+  const container = document.getElementById('quiz-container');
+  const resultEl = container.querySelector('.quiz-result');
+  if (resultEl) {
+    const qCard = document.createElement('div');
+    qCard.id = 'question-card';
+    qCard.className = 'question-card';
+    resultEl.replaceWith(qCard);
+  }
+
+  const nav = document.getElementById('quiz-nav');
+  nav.style.display = '';
+
+  const preview = document.getElementById('quiz-score-preview');
+  if (preview) preview.textContent = '';
+
+  document.getElementById('quiz-progress-bar').style.width = '0%';
 
   renderQuestion();
 }
@@ -368,6 +445,10 @@ function selectAnswer(index) {
   const isCorrect = index === q.correct;
 
   quizState.answers.push({ selected: index, correct: q.correct, isCorrect });
+
+  const correctSoFar = quizState.answers.filter(a => a.isCorrect).length;
+  const preview = document.getElementById('quiz-score-preview');
+  if (preview) preview.textContent = `${correctSoFar}/${quizState.answers.length} corretos`;
 
   const buttons = document.querySelectorAll('.option-btn');
   buttons.forEach((btn, i) => {
@@ -423,31 +504,52 @@ async function showResult() {
   if (pct < 60) { emoji = '📚'; msg = 'Continue estudando — você vai chegar lá!'; }
   else if (pct < 80) { emoji = '👍'; msg = 'Bom resultado! Revise os erros para fixar o conteúdo.'; }
 
-  qCard.outerHTML = `
-    <div class="quiz-result fade-in">
-      <div style="font-size:3rem;margin-bottom:12px">${emoji}</div>
-      <div class="result-score">${pct}%</div>
-      <div class="result-label">${msg}</div>
-      <div class="result-details">
-        <div class="result-stat">
-          <div class="result-stat-value" style="color:var(--accent)">${score}</div>
-          <div class="result-stat-label">Acertos</div>
-        </div>
-        <div class="result-stat">
-          <div class="result-stat-value" style="color:var(--danger)">${total - score}</div>
-          <div class="result-stat-label">Erros</div>
-        </div>
-        <div class="result-stat">
-          <div class="result-stat-value">${total}</div>
-          <div class="result-stat-label">Total</div>
-        </div>
+  const wrongAnswers = quizState.answers
+    .map((a, i) => ({ ...a, question: quizState.questions[i] }))
+    .filter(a => !a.isCorrect);
+
+  const reviewHTML = wrongAnswers.length > 0
+    ? `<div class="quiz-review">
+        <h3>📝 Revise seus erros (${wrongAnswers.length})</h3>
+        ${wrongAnswers.map(({ question, correct }) => `
+          <div class="review-item">
+            <div class="review-question">${question.question}</div>
+            <div class="review-answer">✓ ${question.options[correct]}</div>
+            <div class="review-explanation">${question.explanation}</div>
+          </div>
+        `).join('')}
+      </div>`
+    : `<div class="quiz-review quiz-review-empty">🎯 Parabéns! Você acertou tudo!</div>`;
+
+  const resultEl = document.createElement('div');
+  resultEl.className = 'quiz-result fade-in';
+  resultEl.innerHTML = `
+    <div style="font-size:3rem;margin-bottom:12px">${emoji}</div>
+    <div class="result-score">${pct}%</div>
+    <div class="result-label">${msg}</div>
+    <div class="result-details">
+      <div class="result-stat">
+        <div class="result-stat-value" style="color:var(--accent)">${score}</div>
+        <div class="result-stat-label">Acertos</div>
       </div>
-      <div class="result-actions">
-        <a href="trilha.html?modulo=${quizState.modulo}" class="btn btn-secondary">← Voltar ao Módulo</a>
-        <a href="index.html" class="btn btn-primary">Ver Progresso Geral</a>
+      <div class="result-stat">
+        <div class="result-stat-value" style="color:var(--danger)">${total - score}</div>
+        <div class="result-stat-label">Erros</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-value">${total}</div>
+        <div class="result-stat-label">Total</div>
       </div>
     </div>
+    <div class="result-actions">
+      <button id="restart-quiz-btn" class="btn btn-secondary">↺ Refazer Quiz</button>
+      <a href="trilha.html?modulo=${quizState.modulo}" class="btn btn-secondary">← Módulo</a>
+      <a href="index.html" class="btn btn-primary">Ver Progresso</a>
+    </div>
+    ${reviewHTML}
   `;
+  qCard.replaceWith(resultEl);
+  resultEl.querySelector('#restart-quiz-btn').addEventListener('click', restartQuiz);
 }
 
 // ========================================
@@ -466,7 +568,7 @@ async function initGlossary() {
   function render(query) {
     const q = query.trim().toLowerCase();
     const filtered = q ? terms.filter(t =>
-      t.term.toLowerCase().includes(q) || t.def.toLowerCase().includes(q) || t.definition.toLowerCase().includes(q)
+      t.term.toLowerCase().includes(q) || t.definition.toLowerCase().includes(q)
     ) : terms;
 
     countEl.textContent = `${filtered.length} ${filtered.length === 1 ? 'termo' : 'termos'}`;
@@ -478,7 +580,7 @@ async function initGlossary() {
     }
 
     filtered.forEach(t => {
-      const def = t.definition || t.def || '';
+      const def = t.definition || '';
       const highlightedTerm = q ? t.term.replace(new RegExp(`(${q})`, 'gi'), '<mark class="highlight">$1</mark>') : t.term;
       const highlightedDef = q ? def.replace(new RegExp(`(${q})`, 'gi'), '<mark class="highlight">$1</mark>') : def;
       const item = document.createElement('div');
@@ -534,10 +636,11 @@ function initSimulator() {
 }
 
 function calculate() {
-  const initial = parseFloat(document.getElementById('initial').value) || 0;
-  const monthly = parseFloat(document.getElementById('monthly').value) || 0;
-  const rateInput = parseFloat(document.getElementById('rate').value) || 0;
-  const years = parseInt(document.getElementById('years').value) || 1;
+  const initial = Math.max(0, parseFloat(document.getElementById('initial').value) || 0);
+  const monthly = Math.max(0, parseFloat(document.getElementById('monthly').value) || 0);
+  const rateInput = Math.max(0, parseFloat(document.getElementById('rate').value) || 0);
+  const years = Math.max(1, Math.min(50, parseInt(document.getElementById('years').value) || 1));
+  const inflation = Math.max(0, parseFloat(document.getElementById('inflation')?.value) || 0);
 
   let monthlyRate;
   if (rateMode === 'month') {
@@ -550,26 +653,33 @@ function calculate() {
   let balance = initial;
   let totalInvested = initial;
 
-  const yearlyData = [{ year: 0, balance: initial, invested: initial, gains: 0 }];
+  const yearlyData = [{
+    year: 0, balance: initial, invested: initial, gains: 0, realBalance: initial
+  }];
 
   for (let m = 1; m <= months; m++) {
     balance = balance * (1 + monthlyRate) + monthly;
     totalInvested += monthly;
     if (m % 12 === 0) {
+      const yr = m / 12;
       yearlyData.push({
-        year: m / 12,
-        balance: balance,
+        year: yr,
+        balance,
         invested: totalInvested,
-        gains: balance - totalInvested
+        gains: balance - totalInvested,
+        realBalance: balance / Math.pow(1 + inflation / 100, yr)
       });
     }
   }
 
   const gains = balance - totalInvested;
+  const realFinal = balance / Math.pow(1 + inflation / 100, years);
 
   document.getElementById('result-final').textContent = fmtCurrency(balance);
   document.getElementById('result-invested').textContent = fmtCurrency(totalInvested);
   document.getElementById('result-gains').textContent = fmtCurrency(gains);
+  const realEl = document.getElementById('result-real');
+  if (realEl) realEl.textContent = fmtCurrency(realFinal);
 
   renderChart(yearlyData);
   renderTable(yearlyData);
@@ -582,6 +692,7 @@ function renderChart(data) {
   const labels = data.map(d => d.year === 0 ? 'Início' : `Ano ${d.year}`);
   const balances = data.map(d => d.balance);
   const invested = data.map(d => d.invested);
+  const realBalances = data.map(d => d.realBalance);
 
   if (simChart) simChart.destroy();
 
@@ -612,6 +723,18 @@ function renderChart(data) {
           borderDash: [6, 3],
           pointRadius: 3,
           pointBackgroundColor: '#3a4460'
+        },
+        {
+          label: 'Poder de Compra Real',
+          data: realBalances,
+          borderColor: '#ffa502',
+          backgroundColor: 'rgba(255,165,2,0.06)',
+          fill: false,
+          tension: 0.4,
+          borderWidth: 2,
+          borderDash: [3, 3],
+          pointRadius: 3,
+          pointBackgroundColor: '#ffa502'
         }
       ]
     },
@@ -665,6 +788,7 @@ function renderTable(data) {
       <td style="color:var(--accent)">${fmtCurrency(d.gains)}</td>
       <td style="font-weight:600;color:var(--text-primary)">${fmtCurrency(d.balance)}</td>
       <td><span class="badge badge-success">+${gainPct}%</span></td>
+      <td style="color:#ffa502">${fmtCurrency(d.realBalance)}</td>
     `;
     tbody.appendChild(row);
   });
@@ -691,6 +815,7 @@ function setActiveNav() {
 document.addEventListener('DOMContentLoaded', () => {
   injectNav();
   setActiveNav();
+  initStreak();
   initIndex();
   initTrilha();
   initLesson();

@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = 3000;
+const PORT = 3001;
 
 const DATA_FILE = path.join(__dirname, 'data.json');
 const CONTENT_FILE = path.join(__dirname, 'content.json');
@@ -16,10 +16,30 @@ const content = JSON.parse(fs.readFileSync(CONTENT_FILE, 'utf-8'));
 
 function readData() {
   try {
-    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+    const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+    if (!data.studyDays) data.studyDays = [];
+    return data;
   } catch {
-    return { completedLessons: [], quizScores: {} };
+    return { completedLessons: [], quizScores: {}, studyDays: [] };
   }
+}
+
+function calculateStreak(studyDays) {
+  if (!studyDays || studyDays.length === 0) return 0;
+
+  const unique = [...new Set(studyDays)].sort().reverse();
+  const today = new Date().toISOString().split('T')[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+  if (unique[0] !== today && unique[0] !== yesterday) return 0;
+
+  let streak = 1;
+  for (let i = 0; i < unique.length - 1; i++) {
+    const diff = (new Date(unique[i]) - new Date(unique[i + 1])) / 86400000;
+    if (diff === 1) streak++;
+    else break;
+  }
+  return streak;
 }
 
 function writeData(data) {
@@ -56,7 +76,8 @@ app.get('/api/progresso', (req, res) => {
     totalLessons,
     completedCount,
     overallPercent,
-    modulesProgress
+    modulesProgress,
+    streak: calculateStreak(data.studyDays)
   });
 });
 
@@ -69,6 +90,8 @@ app.post('/api/progresso', (req, res) => {
 
   if (completed && !data.completedLessons.includes(lessonId)) {
     data.completedLessons.push(lessonId);
+    const today = new Date().toISOString().split('T')[0];
+    if (!data.studyDays.includes(today)) data.studyDays.push(today);
   } else if (!completed) {
     data.completedLessons = data.completedLessons.filter(id => id !== lessonId);
   }
