@@ -25,17 +25,23 @@ function injectNav() {
   `;
 }
 
-async function initStreak() {
-  const progress = await api('GET', '/api/progresso');
-  const streak = progress.streak ?? 0;
+function updateNavStreak(streak) {
+  const el = document.getElementById('nav-streak');
+  const count = document.getElementById('nav-streak-count');
+  if (!el || !count) return;
   if (streak > 0) {
-    const el = document.getElementById('nav-streak');
-    const count = document.getElementById('nav-streak-count');
-    if (el && count) {
-      count.textContent = streak;
-      el.style.display = '';
-    }
+    count.textContent = streak;
+    el.style.display = '';
+  } else {
+    el.style.display = 'none';
   }
+}
+
+async function initStreak() {
+  // A index page já atualiza o streak dentro de initIndex() — evita chamada duplicada
+  if (document.getElementById('modules-grid')) return;
+  const progress = await api('GET', '/api/progresso');
+  updateNavStreak(progress.streak ?? 0);
 }
 
 // ---- Utility ----
@@ -94,13 +100,46 @@ async function initIndex() {
 
   if (!el) return;
 
-  const progress = await api('GET', '/api/progresso');
+  const [progress, modules] = await Promise.all([
+    api('GET', '/api/progresso'),
+    api('GET', '/api/content/modules')
+  ]);
 
   heroPercent.textContent = progress.overallPercent + '%';
   heroCompleted.textContent = progress.completedCount;
   heroTotal.textContent = progress.totalLessons;
   overallBar.style.width = progress.overallPercent + '%';
   overallPct.textContent = progress.overallPercent + '%';
+  updateNavStreak(progress.streak ?? 0);
+
+  // Botão "Continue estudando" — substitui "Começar a Aprender" quando há progresso
+  const startBtn = document.getElementById('start-btn');
+  const continueWrapper = document.getElementById('continue-wrapper');
+  if (progress.completedCount > 0) {
+    if (startBtn) startBtn.style.display = 'none';
+    if (continueWrapper) {
+      let nextLesson = null;
+      for (const m of modules) {
+        for (const l of m.lessons) {
+          if (!progress.completedLessons.includes(l.id)) {
+            nextLesson = l;
+            break;
+          }
+        }
+        if (nextLesson) break;
+      }
+      continueWrapper.innerHTML = nextLesson
+        ? `<a href="licao.html?id=${nextLesson.id}" class="btn btn-primary continue-btn">▶ Continuar: ${nextLesson.title}</a>`
+        : `<span class="trilha-completa">✓ Trilha concluída!</span>`;
+    }
+  }
+
+  // Reset
+  document.getElementById('reset-btn')?.addEventListener('click', async () => {
+    if (!confirm('Tem certeza? Todo o progresso, quizzes e streak serão apagados.')) return;
+    await api('POST', '/api/progresso/reset');
+    location.reload();
+  });
 
 
   el.innerHTML = '';
@@ -331,8 +370,33 @@ let quizState = {
   questions: [],
   current: 0,
   answers: [],
-  answered: false
+  answered: false,
+  keyHandler: null
 };
+
+function attachQuizKeyboard() {
+  detachQuizKeyboard();
+  const keyMap = { a: 0, b: 1, c: 2, d: 3, e: 4, '1': 0, '2': 1, '3': 2, '4': 3, '5': 4 };
+  quizState.keyHandler = e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    const idx = keyMap[e.key.toLowerCase()];
+    const q = quizState.questions[quizState.current];
+    if (idx !== undefined && q && idx < q.options.length) {
+      selectAnswer(idx);
+    } else if (e.key === 'Enter') {
+      const btn = document.getElementById('next-btn');
+      if (btn && btn.style.display !== 'none' && quizState.answered) btn.click();
+    }
+  };
+  document.addEventListener('keydown', quizState.keyHandler);
+}
+
+function detachQuizKeyboard() {
+  if (quizState.keyHandler) {
+    document.removeEventListener('keydown', quizState.keyHandler);
+    quizState.keyHandler = null;
+  }
+}
 
 function shuffleOptions(questions) {
   return questions.map(q => {
@@ -356,12 +420,21 @@ async function initQuiz() {
   const { modulo } = getParams();
   if (!modulo) { container.innerHTML = '<p>Módulo não especificado.</p>'; return; }
 
-  document.getElementById('quiz-module-title').textContent = `Módulo ${modulo}`;
+  let questions;
+  if (modulo === 'all') {
+    document.getElementById('quiz-module-title').textContent = 'Quiz Geral';
+    const allData = await Promise.all(
+      ['1', '2', '3', '4', '5'].map(m => api('GET', `/api/quiz/${m}`))
+    );
+    questions = allData.flatMap(d => d.questions || []);
+  } else {
+    document.getElementById('quiz-module-title').textContent = `Módulo ${modulo}`;
+    const data = await api('GET', `/api/quiz/${modulo}`);
+    if (data.error) { container.innerHTML = '<p>' + data.error + '</p>'; return; }
+    questions = data.questions;
+  }
 
-  const data = await api('GET', `/api/quiz/${modulo}`);
-  if (data.error) { container.innerHTML = '<p>' + data.error + '</p>'; return; }
-
-  quizState.questions = shuffleOptions(data.questions);
+  quizState.questions = shuffleOptions(questions);
   quizState.modulo = modulo;
   quizState.current = 0;
   quizState.answers = [];
@@ -371,10 +444,19 @@ async function initQuiz() {
 }
 
 async function restartQuiz() {
-  const data = await api('GET', `/api/quiz/${quizState.modulo}`);
-  if (!data.questions) return;
+  let questions;
+  if (quizState.modulo === 'all') {
+    const allData = await Promise.all(
+      ['1', '2', '3', '4', '5'].map(m => api('GET', `/api/quiz/${m}`))
+    );
+    questions = allData.flatMap(d => d.questions || []);
+  } else {
+    const data = await api('GET', `/api/quiz/${quizState.modulo}`);
+    if (!data.questions) return;
+    questions = data.questions;
+  }
 
-  quizState.questions = shuffleOptions(data.questions);
+  quizState.questions = shuffleOptions(questions);
   quizState.current = 0;
   quizState.answers = [];
   quizState.answered = false;
@@ -435,6 +517,8 @@ function renderQuestion() {
   const nextBtn = document.getElementById('next-btn');
   nextBtn.style.display = 'none';
   nextBtn.textContent = current === questions.length - 1 ? 'Ver Resultado' : 'Próxima →';
+
+  attachQuizKeyboard();
 }
 
 function selectAnswer(index) {
@@ -483,6 +567,7 @@ function initQuizNav() {
 }
 
 async function showResult() {
+  detachQuizKeyboard();
   const score = quizState.answers.filter(a => a.isCorrect).length;
   const total = quizState.questions.length;
   const pct = Math.round((score / total) * 100);
@@ -542,8 +627,10 @@ async function showResult() {
       </div>
     </div>
     <div class="result-actions">
-      <button id="restart-quiz-btn" class="btn btn-secondary">↺ Refazer Quiz</button>
-      <a href="trilha.html?modulo=${quizState.modulo}" class="btn btn-secondary">← Módulo</a>
+      <button id="restart-quiz-btn" class="btn btn-secondary">↺ Refazer</button>
+      ${quizState.modulo === 'all'
+        ? `<a href="trilha.html" class="btn btn-secondary">← Trilha</a>`
+        : `<a href="trilha.html?modulo=${quizState.modulo}" class="btn btn-secondary">← Módulo</a>`}
       <a href="index.html" class="btn btn-primary">Ver Progresso</a>
     </div>
     ${reviewHTML}
@@ -630,6 +717,27 @@ function initSimulator() {
 
   form.querySelectorAll('input').forEach(inp => {
     inp.addEventListener('input', calculate);
+  });
+
+  const presets = {
+    'preset-conservador': { initial: 1000, monthly: 300, rate: 0.84, years: 10, inflation: 4.5 },
+    'preset-moderado':    { initial: 1000, monthly: 500, rate: 1.0,  years: 10, inflation: 4.5 },
+    'preset-agressivo':   { initial: 1000, monthly: 800, rate: 1.2,  years: 10, inflation: 4.5 }
+  };
+
+  Object.entries(presets).forEach(([id, v]) => {
+    document.getElementById(id)?.addEventListener('click', () => {
+      document.getElementById('initial').value   = v.initial;
+      document.getElementById('monthly').value   = v.monthly;
+      document.getElementById('rate').value      = v.rate;
+      document.getElementById('years').value     = v.years;
+      document.getElementById('inflation').value = v.inflation;
+      rateMode = 'month';
+      monthBtn.classList.add('active');
+      yearBtn.classList.remove('active');
+      rateLabel.textContent = 'Taxa de Juros ao Mês (%)';
+      calculate();
+    });
   });
 
   calculate();

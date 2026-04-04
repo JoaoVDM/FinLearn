@@ -1328,6 +1328,102 @@ tr:hover td {
   overflow-x: auto;
 }
 
+/* ========== CONTINUE BUTTON ========== */
+
+.continue-btn {
+  font-size: 0.88rem;
+  padding: 10px 20px;
+  margin-top: 10px;
+  display: inline-block;
+}
+
+.trilha-completa {
+  display: inline-block;
+  margin-top: 10px;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* ========== RESET SECTION ========== */
+
+.reset-section {
+  text-align: center;
+  padding: 20px 0 32px;
+  margin-top: 8px;
+}
+
+.btn-reset {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-family: var(--font);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition);
+}
+
+.btn-reset:hover {
+  color: var(--danger);
+}
+
+/* ========== PRESET BUTTONS (simulador) ========== */
+
+.preset-group {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.preset-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 8px;
+}
+
+.preset-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.preset-btn {
+  flex: 1;
+  padding: 9px 6px;
+  background: var(--bg-secondary);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all var(--transition);
+  font-family: var(--font);
+  white-space: nowrap;
+}
+
+.preset-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-glow);
+}
+
+/* ========== QUIZ KEYBOARD HINT ========== */
+
+.quiz-keyboard-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-align: right;
+  margin-bottom: 20px;
+}
+
+@media (hover: none) {
+  .quiz-keyboard-hint { display: none; }
+}
+
 /* ========== QUIZ REVIEW ========== */
 
 .quiz-review {

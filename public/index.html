@@ -19,7 +19,8 @@
     <div class="hero-text">
       <h1>Aprenda o <span>Mercado Financeiro</span><br>do zero ao avançado</h1>
       <p>5 módulos progressivos com lições completas, quizzes interativos e um simulador de juros compostos. Seu progresso é salvo automaticamente.</p>
-      <a href="trilha.html" class="btn btn-primary" style="font-size:0.95rem;padding:12px 24px;">Começar a Aprender →</a>
+      <a id="start-btn" href="trilha.html" class="btn btn-primary" style="font-size:0.95rem;padding:12px 24px;">Começar a Aprender →</a>
+      <div id="continue-wrapper"></div>
     </div>
     <div class="hero-stats">
       <div class="hero-stat">
@@ -79,6 +80,17 @@
         <div style="font-size:0.82rem;color:var(--text-muted)">Teste seus conhecimentos por módulo</div>
       </div>
     </a>
+    <a href="quiz.html?modulo=all" class="card" style="text-decoration:none;display:flex;align-items:center;gap:16px;">
+      <span style="font-size:2rem">🏆</span>
+      <div>
+        <div style="font-weight:700;color:var(--text-primary);margin-bottom:3px">Quiz Geral</div>
+        <div style="font-size:0.82rem;color:var(--text-muted)">25 questões de todos os módulos</div>
+      </div>
+    </a>
+  </div>
+
+  <div class="reset-section">
+    <button id="reset-btn" class="btn-reset">🗑 Limpar todo o progresso</button>
   </div>
 
 </div>

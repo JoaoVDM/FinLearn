@@ -42,8 +42,8 @@ function calculateStreak(studyDays) {
   return streak;
 }
 
-function writeData(data) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+async function writeData(data) {
+  await fs.promises.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
 }
 
 // GET /api/progresso
@@ -82,7 +82,7 @@ app.get('/api/progresso', (req, res) => {
 });
 
 // POST /api/progresso
-app.post('/api/progresso', (req, res) => {
+app.post('/api/progresso', async (req, res) => {
   const { lessonId, completed } = req.body;
   if (!lessonId) return res.status(400).json({ error: 'lessonId required' });
 
@@ -96,8 +96,14 @@ app.post('/api/progresso', (req, res) => {
     data.completedLessons = data.completedLessons.filter(id => id !== lessonId);
   }
 
-  writeData(data);
+  await writeData(data);
   res.json({ success: true, completedLessons: data.completedLessons });
+});
+
+// POST /api/progresso/reset
+app.post('/api/progresso/reset', async (req, res) => {
+  await writeData({ completedLessons: [], quizScores: {}, studyDays: [] });
+  res.json({ success: true });
 });
 
 // GET /api/quiz/:modulo
@@ -111,7 +117,7 @@ app.get('/api/quiz/:modulo', (req, res) => {
 });
 
 // POST /api/quiz/:modulo
-app.post('/api/quiz/:modulo', (req, res) => {
+app.post('/api/quiz/:modulo', async (req, res) => {
   const { modulo } = req.params;
   const { score, total, answers } = req.body;
 
@@ -129,7 +135,7 @@ app.post('/api/quiz/:modulo', (req, res) => {
     completedAt: new Date().toISOString()
   };
 
-  writeData(data);
+  await writeData(data);
   res.json({ success: true, quizScore: data.quizScores[modulo] });
 });
 

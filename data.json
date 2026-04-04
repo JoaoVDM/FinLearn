@@ -1,18 +1,35 @@
 {
-  "completedLessons": [],
+  "completedLessons": [
+    "1-1"
+  ],
   "quizScores": {
-    "1": {
-      "score": 0,
-      "total": 5,
-      "percent": 0,
+    "all": {
+      "score": 6,
+      "total": 25,
+      "percent": 24,
       "answers": [
         {
-          "selected": 1,
-          "correct": 3,
+          "selected": 0,
+          "correct": 2,
           "isCorrect": false
         },
         {
           "selected": 0,
+          "correct": 1,
+          "isCorrect": false
+        },
+        {
+          "selected": 3,
+          "correct": 1,
+          "isCorrect": false
+        },
+        {
+          "selected": 2,
+          "correct": 3,
+          "isCorrect": false
+        },
+        {
+          "selected": 1,
           "correct": 3,
           "isCorrect": false
         },
@@ -22,17 +39,102 @@
           "isCorrect": false
         },
         {
-          "selected": 2,
+          "selected": 1,
+          "correct": 1,
+          "isCorrect": true
+        },
+        {
+          "selected": 0,
           "correct": 3,
           "isCorrect": false
         },
         {
           "selected": 3,
+          "correct": 2,
+          "isCorrect": false
+        },
+        {
+          "selected": 2,
+          "correct": 3,
+          "isCorrect": false
+        },
+        {
+          "selected": 2,
+          "correct": 0,
+          "isCorrect": false
+        },
+        {
+          "selected": 2,
+          "correct": 1,
+          "isCorrect": false
+        },
+        {
+          "selected": 2,
+          "correct": 3,
+          "isCorrect": false
+        },
+        {
+          "selected": 2,
+          "correct": 3,
+          "isCorrect": false
+        },
+        {
+          "selected": 2,
+          "correct": 3,
+          "isCorrect": false
+        },
+        {
+          "selected": 2,
+          "correct": 1,
+          "isCorrect": false
+        },
+        {
+          "selected": 2,
+          "correct": 1,
+          "isCorrect": false
+        },
+        {
+          "selected": 2,
+          "correct": 2,
+          "isCorrect": true
+        },
+        {
+          "selected": 2,
+          "correct": 2,
+          "isCorrect": true
+        },
+        {
+          "selected": 2,
+          "correct": 3,
+          "isCorrect": false
+        },
+        {
+          "selected": 2,
+          "correct": 2,
+          "isCorrect": true
+        },
+        {
+          "selected": 2,
+          "correct": 0,
+          "isCorrect": false
+        },
+        {
+          "selected": 2,
+          "correct": 2,
+          "isCorrect": true
+        },
+        {
+          "selected": 2,
+          "correct": 2,
+          "isCorrect": true
+        },
+        {
+          "selected": 2,
           "correct": 0,
           "isCorrect": false
         }
       ],
-      "completedAt": "2026-04-04T09:11:45.797Z"
+      "completedAt": "2026-04-04T09:40:49.794Z"
     }
   },
   "studyDays": [
