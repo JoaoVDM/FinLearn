@@ -26,6 +26,7 @@ function injectNav() {
       <li><a href="glossario.html" class="${active('glossario.html')}"><span class="nav-icon">📖</span> Glossário</a></li>
       <li><a href="simulador.html" class="${active('simulador.html')}"><span class="nav-icon">📊</span> Simulador</a></li>
       <li><a href="meta.html" class="${active('meta.html')}"><span class="nav-icon">🎯</span> Meta</a></li>
+      <li><a href="fluxo.html" class="${active('fluxo.html')}"><span class="nav-icon">💰</span> Fluxo de Caixa</a></li>
     </ul>
     <div class="sidebar-footer">
       <button class="theme-toggle" id="theme-toggle">
@@ -757,20 +758,41 @@ function calcRequiredMonthly(goal, initial, monthlyRate, months) {
   return Math.max(0, pmt);
 }
 
-function initSimulator() {
-  const form = document.getElementById('sim-form');
-  if (!form) return;
+function runCompound(initial, monthly, monthlyRate, months, inflation) {
+  let balance = initial;
+  let totalInvested = initial;
+  const yearlyData = [{ year: 0, balance: initial, invested: initial, gains: 0, realBalance: initial }];
 
-  const monthBtn = document.getElementById('rate-month');
-  const yearBtn = document.getElementById('rate-year');
+  for (let m = 1; m <= months; m++) {
+    balance = balance * (1 + monthlyRate) + monthly;
+    totalInvested += monthly;
+    if (m % 12 === 0) {
+      const yr = m / 12;
+      yearlyData.push({
+        year: yr,
+        balance,
+        invested: totalInvested,
+        gains: balance - totalInvested,
+        realBalance: balance / Math.pow(1 + inflation / 100, yr)
+      });
+    }
+  }
+
+  return { balance, totalInvested, yearlyData };
+}
+
+function initRateToggle(onChange) {
+  const monthBtn  = document.getElementById('rate-month');
+  const yearBtn   = document.getElementById('rate-year');
   const rateLabel = document.getElementById('rate-label');
+  if (!monthBtn) return;
 
   monthBtn.addEventListener('click', () => {
     rateMode = 'month';
     monthBtn.classList.add('active');
     yearBtn.classList.remove('active');
     rateLabel.textContent = 'Taxa de Juros ao Mês (%)';
-    calculate();
+    onChange();
   });
 
   yearBtn.addEventListener('click', () => {
@@ -778,8 +800,15 @@ function initSimulator() {
     yearBtn.classList.add('active');
     monthBtn.classList.remove('active');
     rateLabel.textContent = 'Taxa de Juros ao Ano (%)';
-    calculate();
+    onChange();
   });
+}
+
+function initSimulator() {
+  const form = document.getElementById('sim-form');
+  if (!form) return;
+
+  initRateToggle(calculate);
 
   form.querySelectorAll('input').forEach(inp => {
     inp.addEventListener('input', calculate);
@@ -813,7 +842,7 @@ function calculate() {
   const initial = Math.max(0, parseFloat(document.getElementById('initial').value) || 0);
   const rateInput = Math.max(0, parseFloat(document.getElementById('rate').value) || 0);
   const years = Math.max(1, Math.min(50, parseInt(document.getElementById('years').value) || 1));
-  const inflation = Math.max(0, parseFloat(document.getElementById('inflation')?.value) || 0);
+  const inflation = Math.max(0, parseFloat(document.getElementById('inflation').value) || 0);
 
   let monthlyRate;
   if (rateMode === 'month') {
@@ -825,36 +854,14 @@ function calculate() {
   const months = years * 12;
   const monthly = Math.max(0, parseFloat(document.getElementById('monthly').value) || 0);
 
-  let balance = initial;
-  let totalInvested = initial;
-
-  const yearlyData = [{
-    year: 0, balance: initial, invested: initial, gains: 0, realBalance: initial
-  }];
-
-  for (let m = 1; m <= months; m++) {
-    balance = balance * (1 + monthlyRate) + monthly;
-    totalInvested += monthly;
-    if (m % 12 === 0) {
-      const yr = m / 12;
-      yearlyData.push({
-        year: yr,
-        balance,
-        invested: totalInvested,
-        gains: balance - totalInvested,
-        realBalance: balance / Math.pow(1 + inflation / 100, yr)
-      });
-    }
-  }
-
+  const { balance, totalInvested, yearlyData } = runCompound(initial, monthly, monthlyRate, months, inflation);
   const gains = balance - totalInvested;
   const realFinal = balance / Math.pow(1 + inflation / 100, years);
 
-  document.getElementById('result-final').textContent = fmtCurrency(balance);
+  document.getElementById('result-final').textContent    = fmtCurrency(balance);
   document.getElementById('result-invested').textContent = fmtCurrency(totalInvested);
-  document.getElementById('result-gains').textContent = fmtCurrency(gains);
-  const realEl = document.getElementById('result-real');
-  if (realEl) realEl.textContent = fmtCurrency(realFinal);
+  document.getElementById('result-gains').textContent    = fmtCurrency(gains);
+  document.getElementById('result-real').textContent     = fmtCurrency(realFinal);
 
   renderChart(yearlyData);
   renderTable(yearlyData);
@@ -868,25 +875,7 @@ function initMeta() {
   const form = document.getElementById('meta-form');
   if (!form) return;
 
-  const monthBtn = document.getElementById('rate-month');
-  const yearBtn = document.getElementById('rate-year');
-  const rateLabel = document.getElementById('rate-label');
-
-  monthBtn.addEventListener('click', () => {
-    rateMode = 'month';
-    monthBtn.classList.add('active');
-    yearBtn.classList.remove('active');
-    rateLabel.textContent = 'Taxa de Juros ao Mês (%)';
-    calculateMeta();
-  });
-
-  yearBtn.addEventListener('click', () => {
-    rateMode = 'year';
-    yearBtn.classList.add('active');
-    monthBtn.classList.remove('active');
-    rateLabel.textContent = 'Taxa de Juros ao Ano (%)';
-    calculateMeta();
-  });
+  initRateToggle(calculateMeta);
 
   form.querySelectorAll('input').forEach(inp => {
     inp.addEventListener('input', calculateMeta);
@@ -912,28 +901,7 @@ function calculateMeta() {
   const months = years * 12;
   const monthly = calcRequiredMonthly(goal, initial, monthlyRate, months);
 
-  let balance = initial;
-  let totalInvested = initial;
-
-  const yearlyData = [{
-    year: 0, balance: initial, invested: initial, gains: 0, realBalance: initial
-  }];
-
-  for (let m = 1; m <= months; m++) {
-    balance = balance * (1 + monthlyRate) + monthly;
-    totalInvested += monthly;
-    if (m % 12 === 0) {
-      const yr = m / 12;
-      yearlyData.push({
-        year: yr,
-        balance,
-        invested: totalInvested,
-        gains: balance - totalInvested,
-        realBalance: balance / Math.pow(1 + inflation / 100, yr)
-      });
-    }
-  }
-
+  const { balance, totalInvested, yearlyData } = runCompound(initial, monthly, monthlyRate, months, inflation);
   const gains = balance - totalInvested;
   const realFinal = balance / Math.pow(1 + inflation / 100, years);
 
@@ -1068,6 +1036,161 @@ function setActiveNav() {
 }
 
 // ========================================
+// FLUXO DE CAIXA
+// ========================================
+
+let fluxoTransactions = [];
+let fluxoType = 'gasto';
+
+function initFluxo() {
+  if (!document.getElementById('fluxo-add-btn')) return;
+
+  document.getElementById('fluxo-date').value = new Date().toISOString().split('T')[0];
+
+  document.getElementById('fluxo-btn-gasto').addEventListener('click', () => {
+    fluxoType = 'gasto';
+    document.getElementById('fluxo-btn-gasto').classList.add('active');
+    document.getElementById('fluxo-btn-invest').classList.remove('active');
+  });
+
+  document.getElementById('fluxo-btn-invest').addEventListener('click', () => {
+    fluxoType = 'investimento';
+    document.getElementById('fluxo-btn-invest').classList.add('active');
+    document.getElementById('fluxo-btn-gasto').classList.remove('active');
+  });
+
+  document.getElementById('fluxo-add-btn').addEventListener('click', addFluxoTransaction);
+
+  ['fluxo-desc', 'fluxo-value'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') addFluxoTransaction();
+    });
+  });
+
+  document.getElementById('fluxo-month-filter').addEventListener('change', renderFluxo);
+  document.getElementById('fluxo-type-filter').addEventListener('change', renderFluxo);
+
+  loadFluxo();
+}
+
+async function loadFluxo() {
+  fluxoTransactions = await api('GET', '/api/fluxo');
+  populateFluxoMonthFilter();
+  renderFluxo();
+}
+
+function populateFluxoMonthFilter() {
+  const select = document.getElementById('fluxo-month-filter');
+  const months = [...new Set(fluxoTransactions.map(t => t.date.slice(0, 7)))].sort().reverse();
+  const prev = select.value;
+
+  select.innerHTML = '<option value="all">Todos os meses</option>';
+  months.forEach(m => {
+    const [y, mo] = m.split('-');
+    const label = new Date(y, mo - 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    const opt = document.createElement('option');
+    opt.value = m;
+    opt.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+    select.appendChild(opt);
+  });
+
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  if (months.includes(prev)) {
+    select.value = prev;
+  } else if (months.includes(currentMonth)) {
+    select.value = currentMonth;
+  }
+}
+
+function getFluxoFiltered() {
+  const monthVal = document.getElementById('fluxo-month-filter').value;
+  const typeVal  = document.getElementById('fluxo-type-filter').value;
+  return fluxoTransactions.filter(t => {
+    const okMonth = monthVal === 'all' || t.date.startsWith(monthVal);
+    const okType  = typeVal  === 'all' || t.type === typeVal;
+    return okMonth && okType;
+  });
+}
+
+function renderFluxo() {
+  const filtered = getFluxoFiltered();
+
+  // Summary
+  const totalGastos = filtered.filter(t => t.type === 'gasto').reduce((s, t) => s + t.value, 0);
+  const totalInvest = filtered.filter(t => t.type === 'investimento').reduce((s, t) => s + t.value, 0);
+  const total = totalGastos + totalInvest;
+  const taxa = total > 0 ? Math.round((totalInvest / total) * 100) : 0;
+
+  document.getElementById('fluxo-total-gastos').textContent = fmtCurrency(totalGastos);
+  document.getElementById('fluxo-total-invest').textContent = fmtCurrency(totalInvest);
+  document.getElementById('fluxo-taxa').textContent = taxa + '%';
+
+  // List
+  const list = document.getElementById('fluxo-list');
+
+  if (filtered.length === 0) {
+    list.innerHTML = `
+      <div class="fluxo-empty">
+        <div class="fluxo-empty-icon">📭</div>
+        <div>Nenhuma transação encontrada</div>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(t => {
+    const icon = t.type === 'gasto' ? '💸' : '📈';
+    const date = new Date(t.date + 'T12:00:00').toLocaleDateString('pt-BR');
+    const sign = t.type === 'gasto' ? '− ' : '+ ';
+    return `
+      <div class="transaction-item">
+        <span class="transaction-icon">${icon}</span>
+        <div class="transaction-info">
+          <div class="transaction-desc">${t.description}</div>
+          <div class="transaction-date">${date}</div>
+        </div>
+        <span class="transaction-value ${t.type}">${sign}${fmtCurrency(t.value)}</span>
+        <button class="transaction-delete" data-id="${t.id}" title="Remover">✕</button>
+      </div>`;
+  }).join('');
+
+  list.querySelectorAll('.transaction-delete').forEach(btn => {
+    btn.addEventListener('click', () => deleteFluxoTransaction(btn.dataset.id));
+  });
+}
+
+async function addFluxoTransaction() {
+  const desc  = document.getElementById('fluxo-desc').value.trim();
+  const value = parseFloat(document.getElementById('fluxo-value').value);
+  const date  = document.getElementById('fluxo-date').value;
+
+  if (!desc)              { showToast('Informe uma descrição', 'error'); return; }
+  if (!value || value <= 0) { showToast('Informe um valor válido', 'error'); return; }
+
+  const btn = document.getElementById('fluxo-add-btn');
+  btn.disabled = true;
+
+  const result = await api('POST', '/api/fluxo', { type: fluxoType, description: desc, value, date });
+
+  if (result?.success) {
+    document.getElementById('fluxo-desc').value  = '';
+    document.getElementById('fluxo-value').value = '';
+    showToast('Transação adicionada');
+    await loadFluxo();
+  }
+
+  btn.disabled = false;
+}
+
+async function deleteFluxoTransaction(id) {
+  if (!confirm('Remover esta transação?')) return;
+  await api('DELETE', `/api/fluxo/${id}`);
+  fluxoTransactions = fluxoTransactions.filter(t => t.id !== id);
+  populateFluxoMonthFilter();
+  renderFluxo();
+  showToast('Transação removida');
+}
+
+// ========================================
 // INIT
 // ========================================
 
@@ -1083,4 +1206,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initGlossary();
   initSimulator();
   initMeta();
+  initFluxo();
 });

@@ -440,6 +440,7 @@ html[data-theme="light"] .theme-toggle:hover {
 /* ========== INPUTS ========== */
 input[type="text"],
 input[type="number"],
+input[type="date"],
 select,
 textarea {
   background: var(--bg-input);
@@ -462,6 +463,21 @@ textarea:focus {
 }
 
 input::placeholder { color: var(--text-muted); }
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.6);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity var(--transition);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+html[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.3);
+}
 
 /* ========== TABLE ========== */
 table {
@@ -1504,47 +1520,6 @@ tr:hover td {
 }
 
 /* ========== PRESET BUTTONS (simulador) ========== */
-
-/* ========== SIMULATOR MODE TABS ========== */
-.sim-mode-tabs {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 22px;
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 4px;
-}
-
-.sim-mode-btn {
-  flex: 1;
-  padding: 8px 10px;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 0.82rem;
-  font-weight: 600;
-  font-family: var(--font);
-  cursor: pointer;
-  transition: all var(--transition);
-  white-space: nowrap;
-}
-
-.sim-mode-btn.active {
-  background: var(--accent);
-  color: #000;
-}
-
-.sim-mode-btn:not(.active):hover {
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-html[data-theme="light"] .sim-mode-btn:not(.active):hover {
-  background: rgba(0, 0, 0, 0.04);
-}
-
 .preset-group {
   margin-bottom: 20px;
   padding-bottom: 20px;
@@ -1653,6 +1628,140 @@ html[data-theme="light"] .sim-mode-btn:not(.active):hover {
   line-height: 1.5;
 }
 
+/* ========== FLUXO DE CAIXA ========== */
+.fluxo-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 24px;
+  align-items: start;
+  padding-bottom: 60px;
+}
+
+.fluxo-aside {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fluxo-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fluxo-form-card {
+  padding: 20px;
+}
+
+.fluxo-filter-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.fluxo-select {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-family: var(--font);
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: border-color var(--transition);
+}
+
+.fluxo-select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.transaction-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  transition: border-color var(--transition);
+}
+
+.transaction-item:hover {
+  border-color: var(--border-light);
+}
+
+.transaction-icon {
+  font-size: 1.15rem;
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+
+.transaction-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.transaction-desc {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.transaction-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.transaction-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.transaction-value.gasto { color: var(--danger); }
+.transaction-value.investimento { color: var(--accent); }
+
+.transaction-delete {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  line-height: 1;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.transaction-delete:hover {
+  color: var(--danger);
+  background: var(--danger-dim);
+}
+
+.fluxo-empty {
+  text-align: center;
+  padding: 56px 20px;
+  color: var(--text-muted);
+}
+
+.fluxo-empty .fluxo-empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+
 /* ========== RESPONSIVE ========== */
 @media (max-width: 900px) {
   body {
@@ -1679,6 +1788,8 @@ html[data-theme="light"] .sim-mode-btn:not(.active):hover {
   .sim-form { position: static; }
   .result-summary { grid-template-columns: repeat(2, 1fr); }
   .modules-grid { grid-template-columns: 1fr; }
+  .fluxo-layout { grid-template-columns: 1fr; }
+  .fluxo-aside { position: static; }
 }
 
 @media (max-width: 600px) {

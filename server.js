@@ -16,9 +16,11 @@ const content = JSON.parse(fs.readFileSync(CONTENT_FILE, 'utf-8'));
 
 function readData() {
   try {
-    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+    const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+    if (!data.transactions) data.transactions = [];
+    return data;
   } catch {
-    return { completedLessons: [], quizScores: {} };
+    return { completedLessons: [], quizScores: {}, transactions: [] };
   }
 }
 
@@ -79,7 +81,7 @@ app.post('/api/progresso', async (req, res) => {
 
 // POST /api/progresso/reset
 app.post('/api/progresso/reset', async (req, res) => {
-  await writeData({ completedLessons: [], quizScores: {} });
+  await writeData({ completedLessons: [], quizScores: {}, transactions: [] });
   res.json({ success: true });
 });
 
@@ -115,6 +117,49 @@ app.post('/api/quiz/:modulo', async (req, res) => {
   await writeData(data);
   res.json({ success: true, quizScore: data.quizScores[modulo] });
 });
+
+// ── FLUXO DE CAIXA ──────────────────────────────────────────────────────────
+
+// GET /api/fluxo
+app.get('/api/fluxo', (req, res) => {
+  const data = readData();
+  const sorted = [...data.transactions].sort((a, b) => b.date.localeCompare(a.date));
+  res.json(sorted);
+});
+
+// POST /api/fluxo
+app.post('/api/fluxo', async (req, res) => {
+  const { type, description, value, date } = req.body;
+  if (!type || !description || value === undefined) {
+    return res.status(400).json({ error: 'type, description e value são obrigatórios' });
+  }
+  const parsedValue = parseFloat(value);
+  if (isNaN(parsedValue) || parsedValue <= 0) {
+    return res.status(400).json({ error: 'value deve ser um número positivo' });
+  }
+  const data = readData();
+  const transaction = {
+    id: Date.now().toString(),
+    type,
+    description: String(description).trim().slice(0, 80),
+    value: parsedValue,
+    date: date || new Date().toISOString().split('T')[0]
+  };
+  data.transactions.push(transaction);
+  await writeData(data);
+  res.json({ success: true, transaction });
+});
+
+// DELETE /api/fluxo/:id
+app.delete('/api/fluxo/:id', async (req, res) => {
+  const { id } = req.params;
+  const data = readData();
+  data.transactions = data.transactions.filter(t => t.id !== id);
+  await writeData(data);
+  res.json({ success: true });
+});
+
+// ── CONTEÚDO ─────────────────────────────────────────────────────────────────
 
 // GET /api/content/modules — lista de módulos com lições
 app.get('/api/content/modules', (req, res) => {

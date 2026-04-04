@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>(function(){var t=localStorage.getItem('fl_theme');if(t)document.documentElement.dataset.theme=t;})()</script>
+  <title>Fluxo de Caixa — FinLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<nav></nav>
+
+<div class="container">
+  <div class="page-header">
+    <h1>💰 Fluxo de Caixa</h1>
+    <p>Registre seus gastos e investimentos para acompanhar seu fluxo financeiro pessoal.</p>
+  </div>
+
+  <div class="fluxo-layout">
+
+    <!-- Coluna esquerda: resumo + formulário -->
+    <div class="fluxo-aside">
+
+      <div class="fluxo-summary">
+        <div class="result-card">
+          <div class="result-card-label">Total Gastos</div>
+          <div class="result-card-value" id="fluxo-total-gastos" style="color:var(--danger)">R$ 0,00</div>
+        </div>
+        <div class="result-card">
+          <div class="result-card-label">Total Investido</div>
+          <div class="result-card-value" id="fluxo-total-invest" style="color:var(--accent)">R$ 0,00</div>
+        </div>
+        <div class="result-card highlight-card">
+          <div class="result-card-label">Taxa de Investimento</div>
+          <div class="result-card-value" id="fluxo-taxa">0%</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px">do total registrado</div>
+        </div>
+      </div>
+
+      <div class="card fluxo-form-card">
+        <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:16px">Nova Transação</h3>
+
+        <div class="radio-group" style="margin-bottom:16px">
+          <button type="button" class="radio-btn active" id="fluxo-btn-gasto">💸 Gasto</button>
+          <button type="button" class="radio-btn" id="fluxo-btn-invest">📈 Investimento</button>
+        </div>
+
+        <div class="form-group">
+          <label>Descrição</label>
+          <input type="text" id="fluxo-desc" placeholder="Ex: Supermercado, Tesouro Direto…" maxlength="80" />
+        </div>
+
+        <div class="form-group">
+          <label>Valor (R$)</label>
+          <input type="number" id="fluxo-value" min="0.01" step="0.01" placeholder="Ex: 250,00" />
+        </div>
+
+        <div class="form-group">
+          <label>Data</label>
+          <input type="date" id="fluxo-date" />
+        </div>
+
+        <button class="btn btn-primary" id="fluxo-add-btn" style="width:100%;justify-content:center">
+          Adicionar
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Coluna direita: lista de transações -->
+    <div class="fluxo-main">
+
+      <div class="fluxo-filter-bar">
+        <span style="font-weight:600;font-size:0.9rem">Transações</span>
+        <div style="display:flex;gap:8px">
+          <select id="fluxo-month-filter" class="fluxo-select">
+            <option value="all">Todos os meses</option>
+          </select>
+          <select id="fluxo-type-filter" class="fluxo-select">
+            <option value="all">Todos</option>
+            <option value="gasto">Gastos</option>
+            <option value="investimento">Investimentos</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="fluxo-list">
+        <div class="loading"><div class="spinner"></div> Carregando…</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
