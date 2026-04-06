@@ -5,3 +5,9 @@ export const fmtDate = (str) => {
   const [y, m, d] = str.split('-')
   return new Date(+y, +m - 1, +d).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
 }
+
+export const fmtMonth = (str) => {
+  if (!str) return ''
+  const [y, m] = str.split('-')
+  return new Date(+y, +m - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+}

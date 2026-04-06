@@ -44,16 +44,22 @@ export default function Meta() {
             <label>Prazo (meses)</label>
             <input type="number" className="input" value={form.months} onChange={e => set('months', +e.target.value)} min={1} />
           </div>
-          <div className="result-summary" style={{ marginTop: 16 }}>
-            <div className="result-item highlight">
-              <span>Aporte mensal necessário</span>
-              <strong style={{ color: 'var(--accent)', fontSize: '1.1rem', whiteSpace: 'nowrap', flexShrink: 0 }}>{required > 0 ? fmtCurrency(required) : '—'}</strong>
+          {form.initial >= form.goal ? (
+            <div style={{ marginTop: 16, padding: '12px 16px', background: 'rgba(0,200,150,0.08)', border: '1px solid var(--accent)', borderRadius: 'var(--radius)', fontSize: '0.875rem', color: 'var(--accent)' }}>
+              Seu capital inicial já é suficiente para atingir a meta.
             </div>
-            {rows.length > 0 && <>
-              <div className="result-item"><span>Meta</span><strong>{fmtCurrency(form.goal)}</strong></div>
-              <div className="result-item"><span>Total investido</span><strong>{fmtCurrency(rows[rows.length-1].totalInvested)}</strong></div>
-            </>}
-          </div>
+          ) : (
+            <div className="result-summary" style={{ marginTop: 16 }}>
+              <div className="result-item highlight">
+                <span>Aporte mensal necessário</span>
+                <strong style={{ color: 'var(--accent)', fontSize: '1.1rem', whiteSpace: 'nowrap', flexShrink: 0 }}>{required > 0 ? fmtCurrency(required) : '—'}</strong>
+              </div>
+              {rows.length > 0 && <>
+                <div className="result-item"><span>Meta</span><strong>{fmtCurrency(form.goal)}</strong></div>
+                <div className="result-item"><span>Total investido</span><strong>{fmtCurrency(rows[rows.length-1].totalInvested)}</strong></div>
+              </>}
+            </div>
+          )}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <CompoundChart rows={rows} />

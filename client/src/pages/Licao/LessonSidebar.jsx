@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { Check, ChevronRight } from 'lucide-react'
 import ProgressBar from '../../components/ProgressBar.jsx'
 import { useProgress } from '../../context/ProgressContext.jsx'
 
@@ -29,6 +30,8 @@ export default function LessonSidebar({ lesson, currentId }) {
                 className={`sidebar-lesson-item${active ? ' active' : ''}${done ? ' done' : ''}`}
               >
                 <span className="sidebar-lesson-text">{l.title}</span>
+                {active && <ChevronRight size={13} style={{ flexShrink: 0, color: 'var(--accent)' }} />}
+                {!active && done && <Check size={13} style={{ flexShrink: 0, color: 'var(--accent)', opacity: 0.7 }} />}
               </Link>
             )
           })}

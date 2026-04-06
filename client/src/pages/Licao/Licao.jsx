@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Check, Square, CheckSquare, ClipboardCheck } from 'lucide-react'
+import { marked } from 'marked'
 import { getLesson } from '../../services/api.js'
 import { useProgress } from '../../context/ProgressContext.jsx'
 import { showToast } from '../../components/Toast.jsx'
 import LessonSidebar from './LessonSidebar.jsx'
+import ModuleCompleteModal from '../../components/ModuleCompleteModal.jsx'
 import Spinner from '../../components/Spinner.jsx'
 
 export default function Licao() {
   const { id } = useParams()
   const [lesson, setLesson] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [showComplete, setShowComplete] = useState(false)
   const { progress, markLesson } = useProgress()
 
   useEffect(() => {
@@ -33,10 +36,18 @@ export default function Licao() {
   const handleCheck = async (e) => {
     const checked = e.target.checked
     await markLesson(id, checked)
-    showToast(checked ? 'Lição marcada como concluída!' : 'Progresso removido')
+    if (checked) {
+      const allDone = lesson.lessons?.every(l => l.id === id || progress?.completedLessons?.includes(l.id))
+      if (allDone) setShowComplete(true)
+      else showToast('Lição marcada como concluída!')
+    } else {
+      showToast('Progresso removido')
+    }
   }
 
   return (
+    <>
+    {showComplete && <ModuleCompleteModal moduleId={lesson.moduleId} onClose={() => setShowComplete(false)} />}
     <div className="lesson-layout">
       <div className="lesson-main">
         <div className="lesson-header">
@@ -50,7 +61,7 @@ export default function Licao() {
           <h1 className="lesson-title-main">{lesson.title}</h1>
         </div>
 
-        <div className="lesson-body lesson-content" dangerouslySetInnerHTML={{ __html: lesson.content }} />
+        <div className="lesson-body lesson-content" dangerouslySetInnerHTML={{ __html: marked.parse(lesson.content || '') }} />
 
         <label className="complete-label">
           {done
@@ -86,5 +97,6 @@ export default function Licao() {
 
       <LessonSidebar lesson={lesson} currentId={id} />
     </div>
+    </>
   )
 }

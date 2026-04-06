@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Trophy, Star, ThumbsUp, BookOpen, XCircle, CheckCircle, RotateCcw, ChevronLeft } from 'lucide-react'
+import { Trophy, Star, ThumbsUp, BookOpen, XCircle, CheckCircle, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const RESULT_ICON = {
   100: <Trophy size={40} color="var(--warning)" />,
@@ -8,12 +8,15 @@ const RESULT_ICON = {
   0:   <BookOpen size={40} color="var(--text-muted)" />,
 }
 
+const TOTAL_MODULES = 6
+
 export default function QuizResult({ questions, answers, modulo, onRestart }) {
   const score   = answers.filter((a, i) => a === questions[i].correct).length
   const total   = questions.length
   const percent = Math.round(score / total * 100)
   const icon    = percent === 100 ? RESULT_ICON[100] : percent >= 80 ? RESULT_ICON[80] : percent >= 60 ? RESULT_ICON[60] : RESULT_ICON[0]
   const msg     = percent === 100 ? 'Perfeito! Você dominou este módulo.' : percent >= 80 ? 'Ótimo resultado! Quase lá.' : percent >= 60 ? 'Bom progresso, continue assim!' : 'Continue estudando e tente novamente.'
+  const nextModulo = Number(modulo) + 1
 
   const wrong = questions
     .map((q, i) => ({ ...q, chosen: answers[i] }))
@@ -29,12 +32,21 @@ export default function QuizResult({ questions, answers, modulo, onRestart }) {
         <div style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--accent)', marginBottom: 6 }}>{percent}% de acerto</div>
         <p className="quiz-result-label">{msg}</p>
         <div className="button-group-center">
-          <button className="btn btn-primary" onClick={onRestart}>
-            <RotateCcw size={15} /> Refazer Quiz
+          <button className="btn btn-secondary" onClick={onRestart}>
+            <RotateCcw size={15} /> Refazer
           </button>
           <Link to={`/trilha?modulo=${modulo}`} className="btn btn-secondary">
-            <ChevronLeft size={15} /> Voltar à Trilha
+            <ChevronLeft size={15} /> Trilha
           </Link>
+          {nextModulo <= TOTAL_MODULES ? (
+            <Link to={`/licao/${nextModulo}-1`} className="btn btn-primary">
+              Módulo {nextModulo} <ChevronRight size={15} />
+            </Link>
+          ) : (
+            <Link to="/" className="btn btn-primary">
+              <Trophy size={15} /> Início
+            </Link>
+          )}
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from 'react'
+import { useEffect, useReducer, useRef } from 'react'
 import { Check, ClipboardList } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import { getQuiz, postQuizScore } from '../../services/api.js'
@@ -32,8 +32,9 @@ function reducer(state, action) {
 
 export default function Quiz() {
   const { modulo } = useParams()
-  const { refreshProgress } = useProgress()
+  const { refreshProgress, progress } = useProgress()
   const [state, dispatch] = useReducer(reducer, initialState)
+  const nextReadyRef = useRef(true)
 
   useEffect(() => {
     getQuiz(modulo).then(data => {
@@ -51,11 +52,18 @@ export default function Quiz() {
         const idx = keys[e.key.toLowerCase()]
         if (idx < state.questions[state.current].options.length) dispatch({ type: 'ANSWER', chosen: idx })
       }
-      if (e.key === 'Enter' && state.answered) dispatch({ type: 'NEXT' })
+      if (e.key === 'Enter' && state.answered && nextReadyRef.current) dispatch({ type: 'NEXT' })
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [state.done, state.loading, state.answered, state.current, state.questions])
+
+  useEffect(() => {
+    if (!state.answered) return
+    nextReadyRef.current = false
+    const t = setTimeout(() => { nextReadyRef.current = true }, 1500)
+    return () => clearTimeout(t)
+  }, [state.answered, state.current])
 
   useEffect(() => {
     if (state.done && state.questions.length > 0) {
@@ -69,17 +77,24 @@ export default function Quiz() {
   if (state.loading) return <Spinner />
 
   if (!state.started) {
+    const prevScore = progress?.quizScores?.[modulo]
     return (
       <div className="page-content fade-in" style={{ maxWidth: 480, margin: '0 auto' }}>
         <div className="card" style={{ padding: 32, textAlign: 'center' }}>
           <ClipboardList size={40} color="var(--accent)" style={{ marginBottom: 16 }} />
           <h2 style={{ margin: '0 0 8px' }}>Quiz — Módulo {modulo}</h2>
-          <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>
+          <p style={{ color: 'var(--text-muted)', marginBottom: prevScore ? 12 : 24 }}>
             {state.questions.length} questões de múltipla escolha.<br />
-            Você pode usar o teclado (A–E) para responder e Enter para avançar.
+            Use o teclado (A–E) para responder e Enter para avançar.
           </p>
+          {prevScore && (
+            <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '10px 16px', marginBottom: 20, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              Sua última tentativa: <strong style={{ color: prevScore.percent >= 60 ? 'var(--accent)' : 'var(--danger)' }}>{prevScore.percent}% ({prevScore.score}/{prevScore.total})</strong>
+              {prevScore.percent < 100 && <span> — refazer vai atualizar o resultado</span>}
+            </div>
+          )}
           <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => dispatch({ type: 'START' })}>
-            Começar Quiz
+            {prevScore ? 'Refazer Quiz' : 'Começar Quiz'}
           </button>
         </div>
       </div>

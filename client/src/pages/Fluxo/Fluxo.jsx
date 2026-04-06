@@ -5,6 +5,8 @@ import { showToast } from '../../components/Toast.jsx'
 import { fmtCurrency } from '../../utils/format.js'
 import TransactionForm from './TransactionForm.jsx'
 import TransactionList from './TransactionList.jsx'
+import FluxoChart from './FluxoChart.jsx'
+import ConfirmDialog from '../../components/ConfirmDialog.jsx'
 import Spinner from '../../components/Spinner.jsx'
 
 export default function Fluxo() {
@@ -12,6 +14,7 @@ export default function Fluxo() {
   const [loading, setLoading] = useState(true)
   const [typeFilter, setTypeFilter] = useState('todos')
   const [monthFilter, setMonthFilter] = useState('')
+  const [confirmId, setConfirmId] = useState(null)
 
   useEffect(() => {
     getFluxo().then(data => {
@@ -39,10 +42,10 @@ export default function Fluxo() {
     setTransactions(prev => [t, ...prev].sort((a, b) => new Date(b.date) - new Date(a.date)))
   }
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Remover esta transação?')) return
-    await deleteFluxo(id)
-    setTransactions(prev => prev.filter(t => t.id !== id))
+  const handleDelete = async () => {
+    await deleteFluxo(confirmId)
+    setTransactions(prev => prev.filter(t => t.id !== confirmId))
+    setConfirmId(null)
     showToast('Transação removida')
   }
 
@@ -50,6 +53,16 @@ export default function Fluxo() {
 
   return (
     <div className="page-content fade-in">
+      <ConfirmDialog
+        open={!!confirmId}
+        title="Remover transação"
+        message="Esta ação não pode ser desfeita."
+        confirmLabel="Remover"
+        danger
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmId(null)}
+      />
+
       <div className="page-header">
         <h1>Fluxo de Caixa</h1>
         <p>Registre e acompanhe seus gastos e investimentos.</p>
@@ -74,19 +87,17 @@ export default function Fluxo() {
           </div>
         </div>
 
-        <div className="filters-row">
-          <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
-            <option value="todos">Todos os tipos</option>
-            <option value="gasto">Gastos</option>
-            <option value="investimento">Investimentos</option>
-          </select>
-          <select value={monthFilter} onChange={e => setMonthFilter(e.target.value)}>
-            <option value="">Todos os meses</option>
-            {months.map(m => <option key={m} value={m}>{m}</option>)}
-          </select>
-        </div>
+        <FluxoChart
+          gastos={totals.gastos}
+          investimentos={totals.investimentos}
+          typeFilter={typeFilter}
+          monthFilter={monthFilter}
+          months={months}
+          onTypeChange={setTypeFilter}
+          onMonthChange={setMonthFilter}
+        />
 
-        <TransactionList transactions={filtered} onDelete={handleDelete} />
+        <TransactionList transactions={filtered} onDelete={(id) => setConfirmId(id)} />
       </div>
     </div>
   )
