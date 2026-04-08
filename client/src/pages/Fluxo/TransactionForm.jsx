@@ -23,13 +23,12 @@ export default function TransactionForm({ onAdd }) {
   }
 
   return (
-    <form className="card" style={{ padding: 20, marginBottom: 0 }} onSubmit={handleSubmit}>
-      <h3 style={{ marginTop: 0, marginBottom: 14, fontSize: '1rem' }}>Nova Transação</h3>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+    <form className="card transaction-form" onSubmit={handleSubmit}>
+      <h3 className="transaction-form-title">Nova Transação</h3>
+      <div className="transaction-type-group">
         <button
           type="button"
           className={`btn btn-sm ${form.type === 'gasto' ? 'btn-primary' : 'btn-secondary'}`}
-          style={{ flex: 1 }}
           onClick={() => set('type', 'gasto')}
         >
           <CreditCard size={14} /> Gasto
@@ -37,20 +36,19 @@ export default function TransactionForm({ onAdd }) {
         <button
           type="button"
           className={`btn btn-sm ${form.type === 'investimento' ? 'btn-primary' : 'btn-secondary'}`}
-          style={{ flex: 1 }}
           onClick={() => set('type', 'investimento')}
         >
           <TrendingUp size={14} /> Investimento
         </button>
       </div>
       <div className="form-group">
-        <input className="input" placeholder="Descrição" value={form.description} onChange={e => set('description', e.target.value)} required />
+        <input className="input" placeholder="Descrição" value={form.description} onChange={e => set('description', e.target.value)} required aria-label="Descrição" />
       </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <input className="input" type="number" placeholder="Valor (R$)" step="0.01" min="0.01" value={form.value} onChange={e => set('value', e.target.value)} required style={{ flex: 1 }} />
-        <input className="input" type="date" value={form.date} onChange={e => set('date', e.target.value)} style={{ flex: 1 }} />
+      <div className="transaction-row">
+        <input className="input" type="number" placeholder="Valor (R$)" step="0.01" min="0.01" value={form.value} onChange={e => set('value', e.target.value)} required aria-label="Valor" />
+        <input className="input" type="date" value={form.date} onChange={e => set('date', e.target.value)} aria-label="Data" />
       </div>
-      <button className="btn btn-primary" style={{ width: '100%', marginTop: 12 }} disabled={saving}>
+      <button className="btn btn-primary w-full" style={{ marginTop: 12 }} disabled={saving}>
         {saving ? <><Loader size={14} style={{ animation: 'spin 0.8s linear infinite' }} /> Salvando...</> : <><Plus size={14} /> Adicionar</>}
       </button>
     </form>

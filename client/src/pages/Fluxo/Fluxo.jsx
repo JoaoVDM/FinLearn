@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { CreditCard, TrendingUp, Scale } from 'lucide-react'
 import { getFluxo, deleteFluxo } from '../../services/api.js'
 import { showToast } from '../../components/Toast.jsx'
@@ -38,16 +38,16 @@ export default function Fluxo() {
 
   const saldo = totals.investimentos - totals.gastos
 
-  const handleAdd = (t) => {
+  const handleAdd = useCallback((t) => {
     setTransactions(prev => [t, ...prev].sort((a, b) => new Date(b.date) - new Date(a.date)))
-  }
+  }, [])
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     await deleteFluxo(confirmId)
     setTransactions(prev => prev.filter(t => t.id !== confirmId))
     setConfirmId(null)
     showToast('Transação removida')
-  }
+  }, [confirmId])
 
   if (loading) return <Spinner />
 

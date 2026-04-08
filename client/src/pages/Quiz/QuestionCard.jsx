@@ -5,6 +5,11 @@ const LABELS = ['A', 'B', 'C', 'D', 'E']
 
 export default function QuestionCard({ question, answered, chosen, onAnswer, onNext, isLast }) {
   const [nextReady, setNextReady] = useState(false)
+  const [isTouch, setIsTouch] = useState(false)
+
+  useEffect(() => {
+    setIsTouch(window.matchMedia('(hover: none)').matches)
+  }, [])
 
   useEffect(() => {
     if (!answered) { setNextReady(false); return }
@@ -36,7 +41,7 @@ export default function QuestionCard({ question, answered, chosen, onAnswer, onN
         })}
       </div>
 
-      {!answered && (
+      {!answered && !isTouch && (
         <div className="quiz-hints">
           <span>Atalhos:</span>
           {LABELS.slice(0, question.options.length).map(k => (
@@ -56,11 +61,16 @@ export default function QuestionCard({ question, answered, chosen, onAnswer, onN
       )}
 
       {answered && (
-        <div style={{ textAlign: 'right', marginTop: 16 }}>
-          <button className="btn btn-primary" onClick={onNext} disabled={!nextReady} style={{ opacity: nextReady ? 1 : 0.45, transition: 'opacity 0.3s' }}>
+        <div className="text-right mt-4">
+          <button
+            className="btn btn-primary"
+            onClick={onNext}
+            disabled={!nextReady}
+            style={{ opacity: nextReady ? 1 : 0.45, transition: 'opacity 0.3s' }}
+          >
             {isLast ? 'Ver resultado →' : 'Próxima →'}
           </button>
-          {nextReady && (
+          {nextReady && !isTouch && (
             <div className="quiz-hints" style={{ justifyContent: 'flex-end', marginTop: 8 }}>
               <kbd className="kbd">Enter</kbd><span>para continuar</span>
             </div>

@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Play, BookOpen, BookCheck, BarChart2, Trophy, Calculator, Target, Wallet, BookMarked, RotateCcw, Rocket } from 'lucide-react'
+import { Play, BookCheck, BarChart2, Trophy, Calculator, Target, Wallet, BookMarked, RotateCcw, Rocket } from 'lucide-react'
 import { useProgress } from '../../context/ProgressContext.jsx'
 import { getModules } from '../../services/api.js'
 import { showToast } from '../../components/Toast.jsx'
 import ConfirmDialog from '../../components/ConfirmDialog.jsx'
 import ModuleCard from './ModuleCard.jsx'
 import Spinner from '../../components/Spinner.jsx'
-import ProgressBar from '../../components/ProgressBar.jsx'
 
 const TOOLS = [
   { to: '/simulador', Icon: Calculator, label: 'Simulador de Juros',   desc: 'Calcule o crescimento do patrimônio' },
@@ -32,7 +31,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (progress && progress.completedLessons?.length === 0) {
-      const seen = localStorage.getItem('fl_onboarding_seen')
+      let seen; try { seen = localStorage.getItem('fl_onboarding_seen') } catch {}
       if (!seen) setShowOnboarding(true)
     }
   }, [progress])
@@ -57,7 +56,7 @@ export default function Dashboard() {
   }
 
   const dismissOnboarding = () => {
-    localStorage.setItem('fl_onboarding_seen', '1')
+    try { localStorage.setItem('fl_onboarding_seen', '1') } catch {}
     setShowOnboarding(false)
   }
 
@@ -74,14 +73,14 @@ export default function Dashboard() {
       />
 
       {showOnboarding && (
-        <div style={{ background: 'var(--success-dim)', border: '1px solid var(--accent)', borderRadius: 'var(--radius)', padding: '20px 24px', marginBottom: 24, display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-          <Rocket size={28} color="var(--accent)" style={{ flexShrink: 0, marginTop: 2 }} />
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>Bem-vindo ao FinLearn!</div>
-            <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: 12 }}>
-              Comece pelo Módulo 1 e siga a trilha em ordem para uma progressão ideal. Após concluir as lições de cada módulo, faça o quiz para testar seu conhecimento.
+        <div className="alert alert-success">
+          <Rocket size={22} className="alert-icon" color="var(--accent)" />
+          <div className="alert-body">
+            <div className="alert-title">Bem-vindo ao FinLearn!</div>
+            <div style={{ fontSize: 'var(--text-sm)', marginBottom: 12 }}>
+              Comece pelo Módulo 1 e siga a trilha em ordem para uma progressão ideal. Após concluir as lições, faça o quiz para testar seu conhecimento.
             </div>
-            <div style={{ display: 'flex', gap: 10 }}>
+            <div className="button-group">
               <Link to="/licao/1-1" className="btn btn-primary btn-sm" onClick={dismissOnboarding}>
                 <Play size={13} /> Começar agora
               </Link>
@@ -97,41 +96,46 @@ export default function Dashboard() {
 
         <div className="hero-stats">
           <div className="stat-item">
-            <span className="stat-value" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <BookCheck size={20} /> {completedCount}/{totalLessons}
+            <span className="stat-value">
+              <BookCheck size={18} /> {completedCount}/{totalLessons}
             </span>
             <span className="stat-label">Lições concluídas</span>
           </div>
           <div className="stat-item">
-            <span className="stat-value" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <BarChart2 size={20} /> {overallPercent}%
+            <span className="stat-value">
+              <BarChart2 size={18} /> {overallPercent}%
             </span>
             <span className="stat-label">Progresso geral</span>
           </div>
           <div className="stat-item">
-            <span className="stat-value" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Trophy size={20} /> {quizzesDone}/{modules.length}
+            <span className="stat-value">
+              <Trophy size={18} /> {quizzesDone}/{modules.length}
             </span>
             <span className="stat-label">Quizzes feitos</span>
           </div>
         </div>
 
-        <ProgressBar percent={overallPercent} style={{ marginBottom: 24, maxWidth: 440 }} />
+        <div className="hero-progress">
+          <div className="hero-progress-bar">
+            <div className="hero-progress-fill" style={{ width: `${overallPercent}%` }} />
+          </div>
+          <div className="hero-progress-label">{overallPercent}% concluído</div>
+        </div>
 
         <div className="button-group">
           <Link to={continueLink} className="btn btn-primary">
             <Play size={15} /> Continuar Estudando
           </Link>
-          <Link to="/trilha" className="btn btn-secondary">
-            <BookOpen size={15} /> Ver Trilha Completa
-          </Link>
         </div>
+        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-3)', marginTop: 12 }}>
+          Veja todas as lições na <Link to="/trilha" style={{ color: 'var(--accent)' }}>Trilha de Aprendizado</Link>
+        </p>
       </div>
 
       <section>
         <h2 className="section-title">Módulos</h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: -8, marginBottom: 16 }}>
-          Resumo do seu progresso em cada módulo. Acesse a <Link to="/trilha" style={{ color: 'var(--accent)' }}>Trilha</Link> para ver todas as lições detalhadas.
+        <p style={{ color: 'var(--text-3)', fontSize: 'var(--text-sm)', marginTop: -8, marginBottom: 16 }}>
+          Resumo do seu progresso em cada módulo. Acesse a <Link to="/trilha" style={{ color: 'var(--accent)' }}>Trilha</Link> para ver as lições detalhadas.
         </p>
         <div className="modules-grid">
           {modules.map(mod => {
@@ -155,7 +159,7 @@ export default function Dashboard() {
         <div className="quick-links-grid">
           {TOOLS.map(({ to, Icon, label, desc }) => (
             <Link key={to} to={to} className="quick-link-card card">
-              <Icon size={28} color="var(--accent)" className="quick-link-icon" />
+              <Icon size={26} color="var(--accent)" className="quick-link-icon" />
               <div>
                 <div className="quick-link-label">{label}</div>
                 <div className="quick-link-desc">{desc}</div>
@@ -166,8 +170,12 @@ export default function Dashboard() {
       </section>
 
       <div style={{ marginTop: 48, paddingTop: 24, borderTop: '1px solid var(--border)', textAlign: 'right' }}>
-        <button className="btn btn-ghost" style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={() => setConfirmReset(true)}>
-          <RotateCcw size={14} /> Resetar todo o progresso
+        <button
+          className="btn btn-ghost"
+          style={{ fontSize: '0.8rem', color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          onClick={() => setConfirmReset(true)}
+        >
+          <RotateCcw size={13} /> Resetar todo o progresso
         </button>
       </div>
     </div>

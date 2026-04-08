@@ -1,7 +1,9 @@
 import { useState, useMemo } from 'react'
+import { Check } from 'lucide-react'
 import { calcRequiredMonthly, runCompound, convertRate } from '../../utils/finance.js'
 import { fmtCurrency } from '../../utils/format.js'
 import CompoundChart from '../Simulador/CompoundChart.jsx'
+import AlertBox from '../../components/AlertBox.jsx'
 
 export default function Meta() {
   const [form, setForm] = useState({ goal: 100000, initial: 1000, rate: 0.9, months: 120 })
@@ -22,11 +24,11 @@ export default function Meta() {
         <div className="sim-form card">
           <div className="form-group">
             <label>Objetivo (R$)</label>
-            <input type="number" className="input" value={form.goal} onChange={e => set('goal', +e.target.value)} />
+            <input type="number" className="input" value={form.goal} onChange={e => set('goal', +e.target.value)} aria-label="Objetivo" />
           </div>
           <div className="form-group">
             <label>Capital inicial (R$)</label>
-            <input type="number" className="input" value={form.initial} onChange={e => set('initial', +e.target.value)} />
+            <input type="number" className="input" value={form.initial} onChange={e => set('initial', +e.target.value)} aria-label="Capital inicial" />
           </div>
           <div className="form-group">
             <label>
@@ -38,16 +40,16 @@ export default function Meta() {
                 set('rate', +converted.toFixed(4))
               }}>Trocar</button>
             </label>
-            <input type="number" step="0.01" className="input" value={form.rate} onChange={e => set('rate', +e.target.value)} />
+            <input type="number" step="0.01" className="input" value={form.rate} onChange={e => set('rate', +e.target.value)} aria-label="Taxa" />
           </div>
           <div className="form-group">
             <label>Prazo (meses)</label>
-            <input type="number" className="input" value={form.months} onChange={e => set('months', +e.target.value)} min={1} />
+            <input type="number" className="input" value={form.months} onChange={e => set('months', +e.target.value)} min={1} aria-label="Prazo em meses" />
           </div>
           {form.initial >= form.goal ? (
-            <div style={{ marginTop: 16, padding: '12px 16px', background: 'rgba(0,200,150,0.08)', border: '1px solid var(--accent)', borderRadius: 'var(--radius)', fontSize: '0.875rem', color: 'var(--accent)' }}>
+            <AlertBox variant="success" icon={Check}>
               Seu capital inicial já é suficiente para atingir a meta.
-            </div>
+            </AlertBox>
           ) : (
             <div className="result-summary" style={{ marginTop: 16 }}>
               <div className="result-item highlight">

@@ -8,9 +8,7 @@ const RESULT_ICON = {
   0:   <BookOpen size={40} color="var(--text-muted)" />,
 }
 
-const TOTAL_MODULES = 6
-
-export default function QuizResult({ questions, answers, modulo, onRestart }) {
+export default function QuizResult({ questions, answers, modulo, onRestart, totalModules = 5 }) {
   const score   = answers.filter((a, i) => a === questions[i].correct).length
   const total   = questions.length
   const percent = Math.round(score / total * 100)
@@ -38,7 +36,7 @@ export default function QuizResult({ questions, answers, modulo, onRestart }) {
           <Link to={`/trilha?modulo=${modulo}`} className="btn btn-secondary">
             <ChevronLeft size={15} /> Trilha
           </Link>
-          {nextModulo <= TOTAL_MODULES ? (
+          {nextModulo <= totalModules ? (
             <Link to={`/licao/${nextModulo}-1`} className="btn btn-primary">
               Módulo {nextModulo} <ChevronRight size={15} />
             </Link>

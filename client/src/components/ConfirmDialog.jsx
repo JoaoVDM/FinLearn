@@ -1,14 +1,30 @@
+import { useEffect } from 'react'
 import { AlertTriangle } from 'lucide-react'
 
 export default function ConfirmDialog({ open, title, message, confirmLabel = 'Confirmar', danger = false, onConfirm, onCancel }) {
+  useEffect(() => {
+    if (!open) return
+    const handler = (e) => { if (e.key === 'Escape') onCancel() }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [open, onCancel])
+
   if (!open) return null
+
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }} onClick={onCancel}>
-      <div className="card fade-in" style={{ maxWidth: 380, width: '100%', padding: 28, textAlign: 'center' }} onClick={e => e.stopPropagation()}>
+    <div className="modal-backdrop" onClick={onCancel} role="presentation">
+      <div
+        className="modal-content fade-in"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="dialog-title"
+        aria-describedby="dialog-message"
+        onClick={e => e.stopPropagation()}
+      >
         <AlertTriangle size={36} color={danger ? 'var(--danger)' : 'var(--warning)'} style={{ marginBottom: 12 }} />
-        {title && <h3 style={{ margin: '0 0 8px' }}>{title}</h3>}
-        <p style={{ color: 'var(--text-muted)', margin: '0 0 24px', fontSize: '0.9rem' }}>{message}</p>
-        <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+        {title && <h3 id="dialog-title" style={{ margin: '0 0 8px', fontSize: 'var(--text-lg)', fontWeight: 600 }}>{title}</h3>}
+        <p id="dialog-message" className="text-muted" style={{ margin: '0 0 24px', fontSize: 'var(--text-sm)' }}>{message}</p>
+        <div className="button-group-center" style={{ marginTop: 0 }}>
           <button className="btn btn-secondary" onClick={onCancel}>Cancelar</button>
           <button className={`btn ${danger ? 'btn-danger' : 'btn-primary'}`} onClick={onConfirm}>{confirmLabel}</button>
         </div>

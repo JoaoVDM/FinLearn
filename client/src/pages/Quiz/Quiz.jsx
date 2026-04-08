@@ -102,7 +102,7 @@ export default function Quiz() {
   }
 
   if (state.done) {
-    return <QuizResult questions={state.questions} answers={state.answers} modulo={modulo} onRestart={() => dispatch({ type: 'RESTART' })} />
+    return <QuizResult questions={state.questions} answers={state.answers} modulo={modulo} totalModules={5} onRestart={() => dispatch({ type: 'RESTART' })} />
   }
 
   const q = state.questions[state.current]

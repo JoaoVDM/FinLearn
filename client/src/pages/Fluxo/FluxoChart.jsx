@@ -55,7 +55,7 @@ export default function FluxoChart({ gastos, investimentos, typeFilter, monthFil
             <Doughnut data={data} options={options} />
             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
               <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: 2 }}>Saldo</span>
-              <span style={{ fontSize: '0.95rem', fontWeight: 700, color: saldoPositivo ? 'var(--accent)' : 'var(--danger)' }}>
+              <span style={{ fontSize: '0.95rem', fontWeight: 400, color: saldoPositivo ? 'var(--accent)' : 'var(--danger)' }}>
                 {saldoPositivo ? '+' : ''}{fmtCurrency(saldo)}
               </span>
             </div>
@@ -67,14 +67,14 @@ export default function FluxoChart({ gastos, investimentos, typeFilter, monthFil
               <span style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgb(239,68,68)', flexShrink: 0 }} />
               <div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Gastos {total > 0 ? `· ${Math.round(gastos / total * 100)}%` : ''}</div>
-                <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--danger)' }}>{fmtCurrency(gastos)}</div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 400, color: 'var(--danger)' }}>{fmtCurrency(gastos)}</div>
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgb(0,200,150)', flexShrink: 0 }} />
               <div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Investimentos {total > 0 ? `· ${Math.round(investimentos / total * 100)}%` : ''}</div>
-                <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--accent)' }}>{fmtCurrency(investimentos)}</div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 400, color: 'var(--accent)' }}>{fmtCurrency(investimentos)}</div>
               </div>
             </div>
           </div>

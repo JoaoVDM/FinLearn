@@ -5,9 +5,15 @@ async function req(method, path, body) {
   if (body) opts.body = JSON.stringify(body)
   try {
     const res = await fetch(BASE + path, opts)
-    if (!res.ok) return {}
+    if (!res.ok) {
+      console.error(`[API] ${method} ${path} → HTTP ${res.status}`)
+      return {}
+    }
     return await res.json()
-  } catch { return {} }
+  } catch (err) {
+    console.error(`[API] ${method} ${path} → Erro de rede:`, err.message)
+    return {}
+  }
 }
 
 export const getProgress = () => req('GET', '/api/progresso')

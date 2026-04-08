@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, useRef } from 'react'
 import { Search, X, SearchX } from 'lucide-react'
 import { getGlossary } from '../services/api.js'
 import Spinner from '../components/Spinner.jsx'
+import EmptyState from '../components/EmptyState.jsx'
 
 export default function Glossario() {
   const [terms, setTerms] = useState([])
@@ -59,11 +60,12 @@ export default function Glossario() {
           value={query}
           onChange={e => setQuery(e.target.value)}
           autoComplete="off"
+          aria-label="Buscar no glossário"
         />
         {query && (
           <button
             onClick={() => setQuery('')}
-            style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 4, borderRadius: 4 }}
+            className="glossary-clear-btn"
             aria-label="Limpar busca"
           >
             <X size={15} />
@@ -72,15 +74,9 @@ export default function Glossario() {
       </div>
 
       {!query && letters.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, margin: '16px 0' }}>
+        <div className="glossary-letters">
           {letters.map(l => (
-            <button
-              key={l}
-              onClick={() => scrollTo(l)}
-              style={{ width: 32, height: 32, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'var(--accent)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-secondary)'; e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.borderColor = 'var(--border)' }}
-            >
+            <button key={l} onClick={() => scrollTo(l)} className="glossary-letter-btn">
               {l}
             </button>
           ))}
@@ -95,11 +91,7 @@ export default function Glossario() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="empty-state-box">
-          <SearchX size={36} style={{ margin: '0 auto 12px', display: 'block', opacity: 0.35 }} />
-          <div className="empty-state-title">Nenhum termo encontrado</div>
-          <div className="empty-state-desc">Tente buscar por outro termo ou definição.</div>
-        </div>
+        <EmptyState icon={SearchX} title="Nenhum termo encontrado" description="Tente buscar por outro termo ou definição." />
       ) : query ? (
         <div className="glossary-grid">
           {filtered.map(t => (
@@ -112,8 +104,8 @@ export default function Glossario() {
       ) : (
         <div>
           {letters.map(l => (
-            <div key={l} ref={el => letterRefs.current[l] = el} style={{ marginBottom: 32 }}>
-              <div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--accent)', borderBottom: '2px solid var(--accent)', paddingBottom: 6, marginBottom: 16, display: 'inline-block', minWidth: 28 }}>{l}</div>
+            <div key={l} ref={el => letterRefs.current[l] = el} className="glossary-letter-section">
+              <div className="glossary-letter-heading">{l}</div>
               <div className="glossary-grid">
                 {grouped[l].map(t => (
                   <div key={t.term} className="glossary-card card">

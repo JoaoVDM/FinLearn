@@ -10,18 +10,18 @@ export default function ModuleSection({ module, moduleProgress, quizScore, compl
   const total     = moduleProgress?.total || 0
 
   return (
-    <div className="module-section card" style={{ marginBottom: 24 }}>
+    <div className="module-section card" style={{ marginBottom: 20 }}>
       <div className="module-section-header">
         <span className="module-icon"><ModuleIcon icon={module.icon} /></span>
-        <div style={{ flex: 1 }}>
-          <h2 style={{ margin: 0, fontSize: '1.1rem' }}>Módulo {module.id} — {module.title}</h2>
-          <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>{module.description}</p>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h2 className="module-section-title">Módulo {module.id} — {module.title}</h2>
+          <p className="module-desc">{module.description}</p>
         </div>
         {quizScore && <Badge variant="success">Quiz {quizScore.percent}%</Badge>}
       </div>
 
       <ProgressBar percent={percent} style={{ margin: '12px 0 6px' }} />
-      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 16 }}>
+      <div className="module-lesson-count" style={{ marginBottom: 16 }}>
         {completed}/{total} lições concluídas
       </div>
 

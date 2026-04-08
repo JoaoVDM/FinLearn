@@ -11,7 +11,7 @@ export function ProgressProvider({ children }) {
     setProgress(data)
   }, [])
 
-  useEffect(() => { refresh() }, [refresh])
+  useEffect(() => { refresh() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const markLesson = async (lessonId, completed) => {
     await postProgress(lessonId, completed)

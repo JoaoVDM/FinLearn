@@ -22,7 +22,8 @@ export default function Trilha() {
   useEffect(() => {
     const modId = searchParams.get('modulo')
     if (modId && sectionRefs.current[modId]) {
-      setTimeout(() => sectionRefs.current[modId]?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
+      const t = setTimeout(() => sectionRefs.current[modId]?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
+      return () => clearTimeout(t)
     }
   }, [searchParams, modules])
 
