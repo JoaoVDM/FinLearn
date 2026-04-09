@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { Bookmark, Trash2 } from 'lucide-react'
 import { runCompound, convertRate } from '../../utils/finance.js'
 import { fmt, fmtCurrency } from '../../utils/format.js'
 import CompoundChart from './CompoundChart.jsx'
@@ -9,9 +10,18 @@ const PRESETS = [
   { label: 'Arrojado', initial: 10000, monthly: 2000, rate: 1.2, months: 240 },
 ]
 
+function loadScenarios() {
+  try { return JSON.parse(localStorage.getItem('fl_scenarios') || '[]') } catch { return [] }
+}
+
+function persistScenarios(list) {
+  try { localStorage.setItem('fl_scenarios', JSON.stringify(list)) } catch {}
+}
+
 export default function Simulador() {
   const [form, setForm] = useState({ initial: 1000, monthly: 500, rate: 0.8, months: 120 })
   const [rateMode, setRateMode] = useState('month')
+  const [scenarios, setScenarios] = useState(loadScenarios)
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
@@ -22,6 +32,42 @@ export default function Simulador() {
 
   const last = rows[rows.length - 1]
   const applyPreset = (p) => { setForm(p); setRateMode('month') }
+
+  const saveScenario = () => {
+    if (scenarios.length >= 3) {
+      const updated = [...scenarios.slice(1), buildScenario()]
+      setScenarios(updated)
+      persistScenarios(updated)
+    } else {
+      const updated = [...scenarios, buildScenario()]
+      setScenarios(updated)
+      persistScenarios(updated)
+    }
+  }
+
+  const buildScenario = () => {
+    const monthlyRate = rateMode === 'year' ? convertRate(form.rate, 'year', 'month') : form.rate
+    const r = runCompound({ ...form, rate: monthlyRate })
+    const l = r[r.length - 1]
+    return {
+      id: Date.now(),
+      label: `Cenário ${scenarios.length + 1}`,
+      initial: form.initial,
+      monthly: form.monthly,
+      rate: form.rate,
+      rateMode,
+      months: form.months,
+      balance: l?.balance || 0,
+      totalInvested: l?.totalInvested || 0,
+      earnings: l?.earnings || 0,
+    }
+  }
+
+  const removeScenario = (id) => {
+    const updated = scenarios.filter(s => s.id !== id)
+    setScenarios(updated)
+    persistScenarios(updated)
+  }
 
   return (
     <div className="page-content fade-in">
@@ -69,6 +115,9 @@ export default function Simulador() {
               <div className="result-item"><span>Rendimentos</span><strong style={{ color: 'var(--accent)' }}>{fmtCurrency(last.earnings)}</strong></div>
             </div>
           )}
+          <button className="btn btn-secondary w-full" style={{ marginTop: 12 }} onClick={saveScenario} disabled={!last}>
+            <Bookmark size={14} /> Salvar cenário {scenarios.length >= 3 ? '(substitui o mais antigo)' : ''}
+          </button>
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <CompoundChart rows={rows} />
@@ -91,6 +140,48 @@ export default function Simulador() {
           )}
         </div>
       </div>
+
+      {scenarios.length > 0 && (
+        <div style={{ marginTop: 32 }}>
+          <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, marginBottom: 16 }}>Comparação de cenários</h2>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th style={{ textAlign: 'left' }}>Cenário</th>
+                  <th>Capital inicial</th>
+                  <th>Aporte/mês</th>
+                  <th>Taxa</th>
+                  <th>Meses</th>
+                  <th>Total investido</th>
+                  <th>Rendimentos</th>
+                  <th>Patrimônio final</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {scenarios.map(s => (
+                  <tr key={s.id}>
+                    <td style={{ fontWeight: 600 }}>{s.label}</td>
+                    <td>{fmtCurrency(s.initial)}</td>
+                    <td>{fmtCurrency(s.monthly)}</td>
+                    <td>{fmt(s.rate)}% {s.rateMode === 'year' ? 'a.a.' : 'a.m.'}</td>
+                    <td>{s.months}</td>
+                    <td>{fmtCurrency(s.totalInvested)}</td>
+                    <td style={{ color: 'var(--accent)' }}>{fmtCurrency(s.earnings)}</td>
+                    <td><strong>{fmtCurrency(s.balance)}</strong></td>
+                    <td>
+                      <button className="btn-delete" onClick={() => removeScenario(s.id)} title="Remover cenário" aria-label="Remover cenário">
+                        <Trash2 size={14} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

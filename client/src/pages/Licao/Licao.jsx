@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, Check, Square, CheckSquare, ClipboardCheck } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Check, Square, CheckSquare, ClipboardCheck, NotebookPen } from 'lucide-react'
 import { marked } from 'marked'
-import { getLesson } from '../../services/api.js'
+import DOMPurify from 'dompurify'
+import { getLesson, getNota, saveNota } from '../../services/api.js'
 import { useProgress } from '../../context/ProgressContext.jsx'
 import { showToast } from '../../components/Toast.jsx'
 import LessonSidebar from './LessonSidebar.jsx'
@@ -14,16 +15,40 @@ export default function Licao() {
   const [lesson, setLesson] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showComplete, setShowComplete] = useState(false)
+  const [nota, setNota] = useState('')
+  const [notaSaved, setNotaSaved] = useState(false)
+  const saveTimer = useRef(null)
   const { progress, markLesson } = useProgress()
 
   useEffect(() => {
     setLoading(true)
-    getLesson(id).then(data => {
-      setLesson(data.error ? null : data)
+    setNota('')
+    setNotaSaved(false)
+    clearTimeout(saveTimer.current)
+    Promise.all([
+      getLesson(id),
+      getNota(id)
+    ]).then(([lessonData, notaData]) => {
+      setLesson(lessonData.error ? null : lessonData)
+      setNota(notaData.error ? '' : (notaData.text || ''))
       setLoading(false)
       window.scrollTo(0, 0)
     })
   }, [id])
+
+  const handleNotaChange = useCallback((e) => {
+    const text = e.target.value
+    setNota(text)
+    setNotaSaved(false)
+    clearTimeout(saveTimer.current)
+    saveTimer.current = setTimeout(async () => {
+      await saveNota(id, text)
+      setNotaSaved(true)
+      setTimeout(() => setNotaSaved(false), 2000)
+    }, 800)
+  }, [id])
+
+  useEffect(() => () => clearTimeout(saveTimer.current), [])
 
   if (loading) return <div className="lesson-layout"><div className="lesson-main"><Spinner /></div></div>
   if (!lesson)  return <div className="lesson-layout"><div className="lesson-main"><p>Lição não encontrada.</p></div></div>
@@ -61,7 +86,7 @@ export default function Licao() {
           <h1 className="lesson-title-main">{lesson.title}</h1>
         </div>
 
-        <div className="lesson-body lesson-content" dangerouslySetInnerHTML={{ __html: marked.parse(lesson.content || '') }} />
+        <div className="lesson-body lesson-content" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(marked.parse(lesson.content || '')) }} />
 
         <label className="complete-label">
           {done
@@ -74,6 +99,21 @@ export default function Licao() {
           </span>
           {done && <Check size={14} color="var(--accent)" />}
         </label>
+
+        <div className="lesson-note-section">
+          <div className="lesson-note-header">
+            <NotebookPen size={15} />
+            <span>Minhas anotações</span>
+            {notaSaved && <span className="lesson-note-saved">Salvo ✓</span>}
+          </div>
+          <textarea
+            className="lesson-note-textarea"
+            placeholder="Escreva suas anotações sobre esta lição..."
+            value={nota}
+            onChange={handleNotaChange}
+            rows={4}
+          />
+        </div>
 
         <div className="lesson-actions">
           {prevLesson

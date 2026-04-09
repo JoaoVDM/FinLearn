@@ -1,4 +1,4 @@
-import { BookOpen, Landmark, TrendingUp, Target, Zap, Receipt } from 'lucide-react'
+import { BookOpen, Landmark, TrendingUp, Target, Zap, Receipt, Building2, PieChart } from 'lucide-react'
 
 const MODULE_ICONS = {
   book: BookOpen,
@@ -7,6 +7,8 @@ const MODULE_ICONS = {
   target: Target,
   zap: Zap,
   receipt: Receipt,
+  'building-2': Building2,
+  'pie-chart': PieChart,
 }
 
 export default function ModuleIcon({ icon, size = 22 }) {

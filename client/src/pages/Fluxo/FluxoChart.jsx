@@ -1,7 +1,7 @@
 import { Doughnut } from 'react-chartjs-2'
 import { fmtCurrency, fmtMonth } from '../../utils/format.js'
 
-export default function FluxoChart({ gastos, investimentos, typeFilter, monthFilter, months, onTypeChange, onMonthChange }) {
+export default function FluxoChart({ gastos, investimentos, typeFilter, monthFilter, months, onTypeChange, onMonthChange, categoryFilter, categories, onCategoryChange }) {
   const total = gastos + investimentos
   const saldo = investimentos - gastos
   const saldoPositivo = saldo >= 0
@@ -46,6 +46,12 @@ export default function FluxoChart({ gastos, investimentos, typeFilter, monthFil
           <option value="">Todos os meses</option>
           {months.map(m => <option key={m} value={m}>{fmtMonth(m)}</option>)}
         </select>
+        {categories.length > 0 && (
+          <select value={categoryFilter} onChange={e => onCategoryChange(e.target.value)} style={{ flex: 1, minWidth: 130 }}>
+            <option value="">Todas as categorias</option>
+            {categories.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        )}
       </div>
 
       {/* Gráfico */}

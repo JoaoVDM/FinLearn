@@ -35,7 +35,10 @@ export default function TransactionList({ transactions, onDelete }) {
               </span>
               <div className="transaction-info">
                 <div className="transaction-title">{t.description}</div>
-                <div className="transaction-date">{fmtDate(t.date)}</div>
+                <div className="transaction-date">
+                  {fmtDate(t.date)}
+                  {t.category && <span className="transaction-category">{t.category}</span>}
+                </div>
               </div>
               <span className={`transaction-value ${t.type}`}>
                 {t.type === 'gasto' ? '−' : '+'}{fmtCurrency(t.value)}

@@ -182,6 +182,52 @@
           "content": "## Declaração Anual de IR\n\nTodo investidor que possui ativos financeiros deve declará-los na Declaração de Ajuste Anual do Imposto de Renda (DIRPF), entregue anualmente à Receita Federal entre março e maio. Quem não declara corretamente pode cair na malha fina.\n\n### Quem é obrigado a declarar?\n\nEntre outros critérios, é obrigado a declarar quem:\n\n-   Recebeu rendimentos tributáveis acima de R$ 33.888 no ano (2024)\n-   Realizou operações em bolsa de qualquer valor\n-   Teve ganhos de capital na venda de bens ou direitos\n-   Possui bens ou direitos acima de R$ 800 mil\n\n### Como declarar cada tipo de investimento\n\n#### Ações e ETFs\n\n-   **Ficha \"Bens e Direitos\"** — código 31 (ações) ou 74 (ETFs): informe o saldo em carteira no dia 31/12, pelo custo de aquisição (não pelo preço de mercado)\n-   **Ficha \"Renda Variável\"**: informe os lucros/prejuízos mês a mês ao longo do ano\n-   Lucros isentos (vendas até R$ 20k/mês): ficha \"Rendimentos Isentos e Não Tributáveis\"\n\n#### Tesouro Direto e CDB\n\n-   **Ficha \"Bens e Direitos\"** — código 45 (Tesouro Direto) ou 44 (CDB): saldo no dia 31/12\n-   IR já foi retido na fonte — mas o rendimento deve ser informado na ficha de rendimentos tributáveis exclusivos/definitivos\n\n#### FIIs\n\n-   **Ficha \"Bens e Direitos\"** — código 73: saldo em carteira pelo custo de aquisição\n-   Rendimentos mensais isentos: ficha \"Rendimentos Isentos\" — informe o total recebido no ano\n-   Ganho de capital na venda de cotas: tributado a 20% (DARF código 6015 pago mensalmente)\n\n#### Dividendos de ações\n\n-   Isentos — informar na ficha \"Rendimentos Isentos e Não Tributáveis\", código 09\n\n### Documentos que você vai precisar\n\n-   Informe de rendimentos das corretoras (disponível em janeiro/fevereiro)\n-   Informe de rendimentos do Tesouro Direto\n-   Notas de corretagem de todas as operações do ano\n-   DARFs pagos durante o ano\n-   Extrato da custódia na B3 (posição em 31/12)\n\n### Erros comuns a evitar\n\n-   <span class=\"icon-no\">✗</span> Não declarar ativos por achar que \"está isento\" — isenção de IR não dispensa a declaração\n-   <span class=\"icon-no\">✗</span> Declarar pelo preço de mercado ao invés do custo de aquisição\n-   <span class=\"icon-no\">✗</span> Esquecer de informar DARFs pagos ao longo do ano\n-   <span class=\"icon-no\">✗</span> Não informar prejuízos — eles podem compensar lucros futuros\n\n> **Dica prática:** A maioria das corretoras oferece um relatório completo de IR com todos os dados prontos para declaração. Baixe esse relatório todo mês de fevereiro e use-o como base. Em caso de dúvida complexa, consulte um contador especializado em investimentos."
         }
       ]
+    },
+    {
+      "id": 7,
+      "title": "Fundos Imobiliários",
+      "icon": "building-2",
+      "description": "Aprenda a investir em FIIs: tipos, indicadores e como montar uma carteira",
+      "lessons": [
+        {
+          "id": "7-1",
+          "title": "O que são FIIs e por que investir",
+          "content": "## Fundos de Investimento Imobiliário (FIIs)\n\nUm FII é um fundo que reúne recursos de vários investidores para investir no setor imobiliário — seja em imóveis físicos (lajes comerciais, galpões, shoppings) ou em títulos de crédito do setor (CRIs, LCIs).\n\nAo comprar uma **cota de FII na bolsa**, você se torna coproprietário de uma carteira imobiliária diversificada, sem precisar comprar um imóvel inteiro.\n\n### Por que investir em FIIs?\n\n- **Renda mensal:** FIIs são obrigados por lei a distribuir pelo menos 95% do lucro caixa a cada 6 meses. Na prática, a maioria distribui mensalmente.\n- **Isenção de IR nos rendimentos:** os rendimentos pagos por FIIs são isentos de IR para pessoa física, desde que o fundo tenha mais de 50 cotistas e seja negociado em bolsa.\n- **Acessibilidade:** uma cota pode custar R$ 10, R$ 50 ou R$ 100 — você investe em imóveis de alto padrão com pouco capital.\n- **Liquidez:** diferente de um imóvel físico, você vende a cota na bolsa em segundos.\n- **Diversificação:** um único FII pode ter dezenas de imóveis em diferentes cidades e segmentos.\n\n### FII vs. Imóvel Físico\n\n| | Imóvel Físico | FII |\n|--|--|--|\n| Capital mínimo | Alto (centenas de milhares) | Baixo (dezenas de reais) |\n| Liquidez | Baixa (meses para vender) | Alta (bolsa) |\n| Gestão | Você (inquilinos, reformas) | Gestor profissional |\n| Rendimentos | Aluguel (tributado) | Rendimentos isentos de IR |\n| Diversificação | 1 imóvel | Carteira diversificada |\n\n### Riscos dos FIIs\n\n- **Vacância:** imóveis desocupados = menos renda\n- **Risco de mercado:** cota oscila na bolsa como qualquer ação\n- **Risco de gestão:** depende da qualidade do gestor\n- **Ganho de capital:** venda de cotas com lucro paga 20% de IR (sobre a valorização, não os rendimentos)\n\n> **Resumo:** FIIs são uma forma eficiente de investir em imóveis com baixo capital, liquidez, diversificação e rendimentos mensais isentos de IR. São ideais para quem busca renda passiva mensal."
+        },
+        {
+          "id": "7-2",
+          "title": "Tipos de FIIs: tijolo, papel e híbrido",
+          "content": "## Tipos de FIIs\n\nExistem três grandes categorias de FIIs, cada uma com características, riscos e estratégias diferentes.\n\n### FIIs de Tijolo\n\nInvestem diretamente em imóveis físicos. A renda vem do aluguel pago pelos locatários.\n\n**Segmentos mais comuns:**\n\n- **Lajes corporativas:** escritórios de alto padrão em grandes cidades (ex: BRCR11, JSRE11)\n- **Galpões logísticos:** armazéns e centros de distribuição (ex: XPLG11, BTLG11)\n- **Shoppings:** participação em shoppings centers (ex: XPML11, MALL11)\n- **Agências bancárias:** imóveis alugados para bancos\n- **Hospitais e educacional:** imóveis de saúde e ensino\n\n**Vantagens:** renda estável de longo prazo; proteção contra inflação (contratos indexados)\n\n**Riscos:** vacância (imóvel vazio = sem renda); contratos não renovados; desvalorização do imóvel\n\n### FIIs de Papel\n\nNão investem em imóveis físicos, mas em **títulos de crédito do setor imobiliário**, principalmente CRIs (Certificados de Recebíveis Imobiliários) e LCIs.\n\n**Como funciona:** o fundo empresta dinheiro a construtoras/incorporadoras e recebe os juros. Distribui esses juros como rendimentos mensais.\n\n**Rentabilidade:** geralmente atrelada ao IPCA + taxa ou CDI + spread\n\n**Vantagens:** menor sensibilidade a vacância; renda previsível; proteção contra inflação\n\n**Riscos:** risco de crédito (inadimplência do devedor dos CRIs); risco de marcação a mercado\n\n**Exemplos:** MCCI11, KNCR11, HGCR11\n\n### FIIs Híbridos\n\nCombinação de imóveis físicos e títulos de crédito. Oferecem maior diversificação dentro do próprio fundo.\n\n### Como escolher entre os tipos?\n\n| Objetivo | Tipo indicado |\n|--|--|\n| Renda estável no longo prazo | Tijolo (galpões, CRI) |\n| Proteção à inflação | Papel (IPCA+) ou Tijolo |\n| Menor volatilidade de renda | Papel (CDI+) |\n| Diversificação máxima | Híbrido ou carteira mista |\n\n> **Dica:** uma carteira de FIIs equilibrada costuma ter uma mistura de tijolo (galpões e lajes) e papel (IPCA+ e CDI), combinando crescimento de longo prazo com renda previsível."
+        },
+        {
+          "id": "7-3",
+          "title": "Indicadores essenciais: DY, P/VPA e vacância",
+          "content": "## Como Analisar um FII\n\nAntes de investir em um FII, avalie três indicadores principais:\n\n### 1. Dividend Yield (DY)\n\nO Dividend Yield mede o rendimento mensal ou anual em relação ao preço da cota.\n\n`DY anual = (Soma dos rendimentos dos últimos 12 meses / Preço atual da cota) × 100`\n\n**Exemplo:** FII distribuiu R$ 0,80/mês → R$ 9,60 no ano. Cota custa R$ 96.  \nDY = (9,60 / 96) × 100 = **10% ao ano**\n\n**O que é bom?** Depende do momento. Em cenário com Selic alta (>12%), FIIs com DY abaixo de 10-11% podem não compensar o risco. Com Selic baixa, DY de 7-8% já é interessante.\n\n⚠️ **Cuidado:** DY alto pode indicar cota barata (bom) ou distribuição insustentável (mau). Analise sempre a consistência dos rendimentos históricos.\n\n### 2. P/VPA (Preço / Valor Patrimonial por Ação)\n\nCompara o preço de mercado da cota com o valor patrimonial dos ativos do fundo.\n\n`P/VPA = Preço de mercado / Valor Patrimonial por Cota`\n\n- **P/VPA < 1,0:** cota negociada abaixo do valor patrimonial (desconto) — potencialmente atrativo\n- **P/VPA = 1,0:** preço justo\n- **P/VPA > 1,0:** cota negociada acima do valor patrimonial (ágio) — precisa de justificativa (qualidade dos ativos, gestão, crescimento)\n\n**Exemplo:** FII com VPA de R$ 100, cota a R$ 85 → P/VPA = 0,85 (desconto de 15%)\n\n### 3. Vacância\n\nVacância é o percentual de área não locada (imóveis de tijolo) ou de capital não alocado (FIIs de papel).\n\n- **Vacância física:** área vaga / área total do portfólio\n- **Vacância financeira:** impacto em renda da vacância física\n\n**Referências:**\n- Vacância abaixo de 5%: excelente\n- 5-15%: razoável, monitorar\n- Acima de 20%: atenção — risco de queda nos rendimentos\n\n### Outros indicadores relevantes\n\n- **Número de cotistas:** fundos com poucos cotistas têm menor liquidez\n- **Taxa de administração:** quanto menor, melhor. Acima de 1% ao ano começa a ser alto\n- **Qualidade dos ativos:** localização, idade e qualidade construtiva dos imóveis\n- **Histórico de rendimentos:** consistência é mais importante do que pico pontual\n\n### Como acompanhar?\n\nUtilize plataformas como **Funds Explorer**, **Status Invest** ou **FIIs.com.br** para comparar indicadores, histórico de rendimentos e carteira de ativos de qualquer FII.\n\n> **Resumo:** combine DY consistente + P/VPA próximo ou abaixo de 1 + vacância baixa para encontrar FIIs de qualidade a preço razoável."
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Carteira & Planejamento",
+      "icon": "pie-chart",
+      "description": "Monte uma carteira sólida, aprenda a rebalancear e planeje sua aposentadoria",
+      "lessons": [
+        {
+          "id": "8-1",
+          "title": "Como montar uma carteira diversificada",
+          "content": "## Montando uma Carteira Diversificada\n\nUma carteira de investimentos bem estruturada não é só uma lista de ativos — é uma combinação intencional de classes com comportamentos diferentes para equilibrar risco e retorno.\n\n### As principais classes de ativos\n\n| Classe | Exemplos | Risco | Para que serve |\n|--|--|--|--|\n| Renda fixa conservadora | Tesouro Selic, CDB liquidez diária | Baixíssimo | Reserva de emergência |\n| Renda fixa de prazo | CDB, LCI, Tesouro IPCA+ | Baixo | Objetivos de médio prazo |\n| Ações | Ações, ETFs | Alto | Crescimento de longo prazo |\n| FIIs | XPLG11, MCCI11 | Médio | Renda passiva mensal |\n| Internacional | BDRs, ETFs globais | Médio-alto | Proteção cambial, diversificação |\n\n### O ponto de partida: a pirâmide\n\nPense em camadas:\n\n1. **Base (reserva de emergência):** 3 a 6 meses de gastos em renda fixa com liquidez diária. Nunca invista sem isso.\n2. **Meio (objetivos de médio prazo):** renda fixa de prazo, LCI/LCA, CDB. Para metas de 1 a 5 anos.\n3. **Topo (crescimento de longo prazo):** ações, FIIs, ETFs, internacionais. Para 5+ anos.\n\n### Regra prática: 100 menos a idade\n\nUma diretriz simples para calcular exposição em renda variável:\n\n`% em renda variável ≈ 100 - sua idade`\n\n- 25 anos: ~75% em renda variável\n- 40 anos: ~60% em renda variável  \n- 60 anos: ~40% em renda variável\n\nNão é uma lei — é um ponto de partida. Ajuste conforme sua tolerância a risco e objetivos.\n\n### Exemplo de carteira para um jovem de 28 anos\n\n- 10% reserva de emergência (Tesouro Selic)\n- 20% renda fixa (CDB, LCI/LCA)\n- 40% ações (mistura de ETFs e ações individuais)\n- 20% FIIs (mistura de papel e tijolo)\n- 10% internacional (ETFs de S&P 500 ou BDRs)\n\n### Por que diversificar?\n\nAtivos correlacionados reagem de forma parecida a eventos. Ativos não-correlacionados suavizam o caminho:\n\n- Quando a bolsa cai, renda fixa se mantém (às vezes sobe)\n- Quando a inflação sobe, Tesouro IPCA+ e FIIs de papel protegem\n- Quando o dólar sobe, ativos internacionais ganham\n\n> **Regra de ouro:** Não existe alocação perfeita. A melhor carteira é aquela que você consegue manter sem entrar em pânico na primeira crise."
+        },
+        {
+          "id": "8-2",
+          "title": "Rebalanceamento: quando e como fazer",
+          "content": "## Rebalanceamento de Carteira\n\nCom o tempo, as variações do mercado deslocam sua carteira da alocação original. Ações sobem e passam a representar 60% quando o alvo era 40%. FIIs caem e ficam subrepresentados. O **rebalanceamento** corrige isso.\n\n### Por que rebalancear?\n\n1. **Controle de risco:** impede que um ativo tome conta da carteira além do planejado\n2. **Força a disciplina:** você automaticamente compra o que caiu e vende o que subiu muito — buy low, sell high de forma sistemática\n3. **Mantém o perfil de risco:** com o tempo, uma carteira sem rebalanceamento vira outra coisa\n\n### Quando rebalancear?\n\nExistem duas abordagens principais:\n\n**Por tempo (calendário):**\n- Rebalancear a cada 6 ou 12 meses, independente do que aconteceu\n- Simples e fácil de executar\n- Menos custos de transação\n\n**Por desvio (threshold):**\n- Rebalancear quando algum ativo desvia mais de X% da alocação alvo (ex: 5%)\n- Mais preciso, mas exige acompanhamento constante\n\n**Para iniciantes:** rebalanceamento anual + novos aportes direcionados é o caminho mais prático.\n\n### Como rebalancear na prática\n\n**Método 1 — Aportes direcionados (ideal para quem ainda está acumulando):**\n\nSe ações sobem e passam do alvo, direcione os novos aportes para as classes que ficaram abaixo do alvo. Evita vender e pagar IR.\n\n**Método 2 — Venda e compra:**\n\nVenda o que está acima do alvo e compre o que está abaixo. Mais rápido, mas gera fato gerador de IR (se houver lucro em renda variável).\n\n### Exemplo prático\n\nAlvo: 50% renda fixa / 30% ações / 20% FIIs\n\nApós 1 ano: 40% renda fixa / 42% ações / 18% FIIs\n\n→ Ações subiram demais. Com os próximos aportes: direcione mais para renda fixa e FIIs até voltar ao alvo.\n\n### Erros comuns\n\n- **Rebalancear demais:** muitas transações geram custos e IR desnecessários\n- **Não rebalancear nunca:** a carteira deriva e você assume riscos maiores do que planejou\n- **Deixar emoção guiar:** não venda ações na queda por pânico — isso é o oposto do rebalanceamento\n\n> **Conclusão:** rebalanceamento anual com aportes direcionados é eficiente, barato e disciplinado. O objetivo não é performance máxima, mas manter o risco dentro do que você planejou."
+        },
+        {
+          "id": "8-3",
+          "title": "Planejamento para aposentadoria",
+          "content": "## Planejamento para Aposentadoria com Investimentos\n\nAposentadoria não é um evento — é um processo de décadas. Quanto antes você começar, menor será o esforço necessário graças ao poder dos juros compostos.\n\n### O efeito do tempo: por que começar cedo\n\n| Início | Aporte mensal | Taxa | Patrimônio aos 65 anos |\n|--|--|--|--|\n| 25 anos (40 anos) | R$ 500 | 0,8% a.m. | ~R$ 1,87 milhão |\n| 35 anos (30 anos) | R$ 500 | 0,8% a.m. | ~R$ 702 mil |\n| 45 anos (20 anos) | R$ 500 | 0,8% a.m. | ~R$ 219 mil |\n\nMesmo aporte, mesma taxa. A diferença é apenas o tempo.\n\n### Quanto você precisa?\n\nUma regra prática internacional: o **múltiplo de 25**.\n\n`Patrimônio necessário = Gasto mensal × 12 × 25`\n\nSe você gasta R$ 5.000/mês: 5.000 × 12 × 25 = **R$ 1,5 milhão**\n\nCom R$ 1,5M investido a ~4% real ao ano, você pode sacar R$ 5.000/mês indefinidamente sem esgotar o capital (regra dos 4%).\n\n### Estratégia por fase\n\n**Fase de acumulação (20-50 anos):**\n- Maximize renda variável (ações, FIIs, ETFs)\n- Reinvista todos os rendimentos\n- Aporte mensalmente independente do mercado (DCA)\n- Não toque no investimento para outras coisas\n\n**Fase de transição (50-60 anos):**\n- Comece a reduzir gradualmente a exposição em renda variável\n- Aumente renda fixa de longo prazo (Tesouro IPCA+ longo)\n- Mantenha FIIs para renda mensal futura\n\n**Fase de uso (60+ anos):**\n- Priorize ativos geradores de renda (FIIs, dividendos)\n- Preserve capital em renda fixa inflação-linked\n- Saque apenas os rendimentos, sem tocar no principal\n\n### PGBL e VGBL\n\nPlanos de previdência privada podem ser complementos úteis:\n\n- **PGBL:** deduz aportes do IR na declaração (até 12% da renda tributável). Ideal para quem faz declaração completa.\n- **VGBL:** não há dedução fiscal, mas apenas o rendimento é tributado no resgate. Ideal para declaração simplificada ou valores acima de 12% da renda.\n\n**Atenção:** compare sempre a taxa de administração e o come-cotas com alternativas como Tesouro IPCA+ longo ou FIIs.\n\n### O mais importante\n\nConsistência supera timing. Um investidor que aporta R$ 500 todo mês por 30 anos supera qualquer um que tenta acertar o momento certo do mercado.\n\n> **Ação imediata:** Use a calculadora de metas neste app para calcular quanto você precisa aportar por mês para atingir seu número de aposentadoria."
+        }
+      ]
     }
   ],
   "quizzes": {
@@ -525,6 +571,120 @@
         ],
         "correct": 1,
         "explanation": "Como o total de vendas foi R$ 18.000 (abaixo do limite de R$ 20.000), toda a operação é isenta de IR — mesmo com lucro. A isenção se aplica ao total de vendas do mês, não ao lucro."
+      }
+    ],
+    "7": [
+      {
+        "question": "Qual a principal vantagem fiscal dos rendimentos de FIIs para pessoas físicas?",
+        "options": [
+          "Alíquota reduzida de 10% sobre os rendimentos",
+          "Isenção de IR nos rendimentos, desde que o FII tenha +50 cotistas e seja negociado em bolsa",
+          "Dedução dos rendimentos na declaração anual",
+          "Isenção de IOF nas aplicações"
+        ],
+        "correct": 1,
+        "explanation": "Os rendimentos (aluguéis e juros) distribuídos por FIIs são isentos de IR para pessoas físicas, desde que o fundo tenha no mínimo 50 cotistas e suas cotas sejam negociadas exclusivamente em bolsa ou mercado de balcão organizado."
+      },
+      {
+        "question": "O que é P/VPA em FIIs?",
+        "options": [
+          "Percentual de vacância por área do portfólio",
+          "Relação entre preço de mercado da cota e seu valor patrimonial",
+          "Taxa de administração anual do fundo",
+          "Proporção de papel e tijolo na carteira do fundo"
+        ],
+        "correct": 1,
+        "explanation": "P/VPA (Preço / Valor Patrimonial por Ação) compara o preço que o mercado paga pela cota com o valor real dos ativos do fundo. P/VPA abaixo de 1 indica desconto; acima de 1, ágio."
+      },
+      {
+        "question": "Um FII de papel investe principalmente em:",
+        "options": [
+          "Papéis de parede e materiais de construção para imóveis",
+          "Imóveis físicos como escritórios e galpões",
+          "Títulos de crédito do setor imobiliário, como CRIs e LCIs",
+          "Ações de empresas de construção civil listadas na bolsa"
+        ],
+        "correct": 2,
+        "explanation": "FIIs de papel investem em títulos de crédito imobiliário, principalmente CRIs (Certificados de Recebíveis Imobiliários). A renda vem dos juros pagos por esses títulos, geralmente indexados ao IPCA ou CDI."
+      },
+      {
+        "question": "O que é vacância em um FII de tijolo?",
+        "options": [
+          "Período em que o fundo não distribui rendimentos",
+          "Percentual de área física não locada do portfólio de imóveis",
+          "Tempo médio de renovação dos contratos de aluguel",
+          "Número de imóveis aguardando aprovação regulatória"
+        ],
+        "correct": 1,
+        "explanation": "Vacância é o percentual de área não locada em relação ao total do portfólio. Alta vacância significa menos renda de aluguéis e rendimentos menores. É um dos indicadores mais importantes para FIIs de tijolo."
+      },
+      {
+        "question": "Qual a alíquota de IR sobre o ganho de capital na venda de cotas de FII com lucro?",
+        "options": [
+          "Isento, assim como os rendimentos mensais",
+          "15%, com isenção para vendas abaixo de R$ 20 mil no mês",
+          "20% sobre o lucro, sem isenção",
+          "Tabela regressiva de 22,5% a 15%"
+        ],
+        "correct": 2,
+        "explanation": "A isenção de IR vale apenas para os RENDIMENTOS distribuídos pelos FIIs. O ganho de capital na venda das cotas é tributado à alíquota de 20%, sem isenção por valor de vendas — diferente das ações."
+      }
+    ],
+    "8": [
+      {
+        "question": "Qual deve ser o primeiro passo antes de montar uma carteira de investimentos?",
+        "options": [
+          "Comprar ações de empresas sólidas como Petrobras e Vale",
+          "Investir em FIIs para obter renda mensal imediata",
+          "Construir uma reserva de emergência de 3 a 6 meses de gastos em renda fixa líquida",
+          "Abrir conta em múltiplas corretoras para diversificar"
+        ],
+        "correct": 2,
+        "explanation": "A reserva de emergência é a base de qualquer pirâmide financeira. Sem ela, qualquer imprevisto obriga você a resgatar investimentos no pior momento. Deve ficar em renda fixa com liquidez diária (Tesouro Selic ou CDB liquidez diária)."
+      },
+      {
+        "question": "Qual o objetivo principal do rebalanceamento de carteira?",
+        "options": [
+          "Maximizar o retorno vendendo os ativos que mais subiram",
+          "Manter a alocação original e controlar o risco ao longo do tempo",
+          "Reduzir o número de ativos para simplificar a gestão",
+          "Aproveitar quedas do mercado para comprar mais"
+        ],
+        "correct": 1,
+        "explanation": "O rebalanceamento corrige o desvio da alocação original causado pelas variações do mercado. Sem ele, ativos que sobem passam a dominar a carteira, aumentando o risco além do planejado."
+      },
+      {
+        "question": "Pela regra dos 4%, quanto patrimônio você precisa para se aposentar com R$ 6.000/mês?",
+        "options": [
+          "R$ 720 mil",
+          "R$ 1,2 milhão",
+          "R$ 1,8 milhão",
+          "R$ 3,6 milhões"
+        ],
+        "correct": 2,
+        "explanation": "Pela regra dos 4%, patrimônio = gastos anuais × 25. Gastos de R$ 6.000/mês = R$ 72.000/ano × 25 = R$ 1,8 milhão. Com esse patrimônio investido a ~4% real ao ano, os saques de R$ 6.000/mês não esgotam o capital."
+      },
+      {
+        "question": "Qual a diferença entre PGBL e VGBL na previdência privada?",
+        "options": [
+          "PGBL é para renda variável; VGBL para renda fixa",
+          "PGBL permite deduzir aportes do IR (até 12% da renda); VGBL não oferece dedução",
+          "VGBL tem alíquota menor no resgate; PGBL é mais caro",
+          "São equivalentes, apenas com nomes diferentes por regulação"
+        ],
+        "correct": 1,
+        "explanation": "PGBL permite deduzir os aportes da base de cálculo do IR na declaração anual (até 12% da renda tributável) — ideal para quem declara no modelo completo. VGBL não tem dedução, mas apenas o rendimento (não o principal) é tributado no resgate."
+      },
+      {
+        "question": "Qual a estratégia mais eficiente para um investidor na fase de acumulação?",
+        "options": [
+          "Concentrar em renda fixa para proteger o capital acumulado",
+          "Comprar ativos apenas quando o mercado está em queda",
+          "Aportar mensalmente de forma consistente independente do mercado (DCA)",
+          "Rebalancear mensalmente para maximizar o retorno"
+        ],
+        "correct": 2,
+        "explanation": "DCA (Dollar Cost Averaging) — aportar regularmente todo mês — elimina o risco de tentar acertar o timing do mercado. Quando o mercado cai, você compra mais cotas pelo mesmo valor. A consistência ao longo de décadas é o ingrediente mais poderoso na construção de patrimônio."
       }
     ]
   },

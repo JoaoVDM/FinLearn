@@ -6,13 +6,13 @@ import CompoundChart from '../Simulador/CompoundChart.jsx'
 import AlertBox from '../../components/AlertBox.jsx'
 
 export default function Meta() {
-  const [form, setForm] = useState({ goal: 100000, initial: 1000, rate: 0.9, months: 120 })
+  const [form, setForm] = useState({ goal: 100000, initial: 1000, rate: 0.9, months: 120, skipPerYear: 0 })
   const [rateMode, setRateMode] = useState('month')
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const monthlyRate = rateMode === 'year' ? convertRate(form.rate, 'year', 'month') : form.rate
   const required = useMemo(() => calcRequiredMonthly({ ...form, rate: monthlyRate }), [form, monthlyRate])
-  const rows = useMemo(() => runCompound({ initial: form.initial, monthly: required, rate: monthlyRate, months: form.months }), [form, required, monthlyRate])
+  const rows = useMemo(() => runCompound({ initial: form.initial, monthly: required, rate: monthlyRate, months: form.months, skipPerYear: form.skipPerYear }), [form, required, monthlyRate])
 
   return (
     <div className="page-content fade-in">
@@ -46,6 +46,10 @@ export default function Meta() {
             <label>Prazo (meses)</label>
             <input type="number" className="input" value={form.months} onChange={e => set('months', +e.target.value)} min={1} aria-label="Prazo em meses" />
           </div>
+          <div className="form-group">
+            <label>Meses sem aporte por ano <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>({form.skipPerYear === 0 ? 'todos os meses' : `${12 - form.skipPerYear} meses contribuídos/ano`})</span></label>
+            <input type="range" min={0} max={11} value={form.skipPerYear} onChange={e => set('skipPerYear', +e.target.value)} style={{ width: '100%', accentColor: 'var(--accent)' }} aria-label="Meses sem aporte por ano" />
+          </div>
           {form.initial >= form.goal ? (
             <AlertBox variant="success" icon={Check}>
               Seu capital inicial já é suficiente para atingir a meta.
@@ -53,7 +57,7 @@ export default function Meta() {
           ) : (
             <div className="result-summary" style={{ marginTop: 16 }}>
               <div className="result-item highlight">
-                <span>Aporte mensal necessário</span>
+                <span>Aporte mensal necessário{form.skipPerYear > 0 ? ` (nos ${12 - form.skipPerYear} meses ativos)` : ''}</span>
                 <strong style={{ color: 'var(--accent)', fontSize: '1.1rem', whiteSpace: 'nowrap', flexShrink: 0 }}>{required > 0 ? fmtCurrency(required) : '—'}</strong>
               </div>
               {rows.length > 0 && <>

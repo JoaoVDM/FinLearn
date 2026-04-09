@@ -1,11 +1,13 @@
-export function runCompound({ initial, monthly, rate, months }) {
+export function runCompound({ initial, monthly, rate, months, skipPerYear = 0 }) {
   let balance = Number(initial)
   const monthlyRate = Number(rate) / 100
   const rows = []
   let totalInvested = balance
   for (let m = 1; m <= months; m++) {
-    balance = balance * (1 + monthlyRate) + Number(monthly)
-    totalInvested += Number(monthly)
+    const monthInYear = ((m - 1) % 12) + 1
+    const contributes = monthInYear > Number(skipPerYear)
+    balance = balance * (1 + monthlyRate) + (contributes ? Number(monthly) : 0)
+    if (contributes) totalInvested += Number(monthly)
     if (m % 12 === 0 || m === months) {
       rows.push({ year: Math.ceil(m / 12), month: m, balance, totalInvested, earnings: balance - totalInvested })
     }
@@ -13,14 +15,32 @@ export function runCompound({ initial, monthly, rate, months }) {
   return rows
 }
 
-export function calcRequiredMonthly({ goal, initial, rate, months }) {
-  const r = Number(rate) / 100
+export function calcRequiredMonthly({ goal, initial, rate, months, skipPerYear = 0 }) {
   const fv = Number(goal)
   const pv = Number(initial)
   const n = Number(months)
-  if (r === 0) return (fv - pv) / n
-  const fvFactor = Math.pow(1 + r, n)
-  return (fv - pv * fvFactor) / ((fvFactor - 1) / r)
+
+  // Capital inicial já suficiente ou prazo inválido
+  if (pv >= fv || n <= 0) return 0
+
+  if (Number(skipPerYear) === 0) {
+    const r = Number(rate) / 100
+    if (r === 0) return (fv - pv) / n
+    const fvFactor = Math.pow(1 + r, n)
+    const result = (fv - pv * fvFactor) / ((fvFactor - 1) / r)
+    return Math.max(0, result)
+  }
+
+  // Busca binária para aportes com meses de pausa
+  let lo = 0, hi = fv
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2
+    const rows = runCompound({ initial, monthly: mid, rate, months, skipPerYear })
+    const finalBalance = rows[rows.length - 1]?.balance || 0
+    if (finalBalance < fv) lo = mid
+    else hi = mid
+  }
+  return (lo + hi) / 2
 }
 
 export function convertRate(rate, from, to) {

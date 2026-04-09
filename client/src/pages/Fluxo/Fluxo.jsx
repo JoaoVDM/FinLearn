@@ -1,23 +1,49 @@
 import { useEffect, useState, useMemo, useCallback } from 'react'
-import { CreditCard, TrendingUp, Scale } from 'lucide-react'
+import { CreditCard, TrendingUp, Scale, Download } from 'lucide-react'
 import { getFluxo, deleteFluxo } from '../../services/api.js'
 import { showToast } from '../../components/Toast.jsx'
 import { fmtCurrency } from '../../utils/format.js'
 import TransactionForm from './TransactionForm.jsx'
 import TransactionList from './TransactionList.jsx'
 import FluxoChart from './FluxoChart.jsx'
+import EvolutionChart from './EvolutionChart.jsx'
+import BudgetManager from './BudgetManager.jsx'
+import RecurringManager from './RecurringManager.jsx'
 import ConfirmDialog from '../../components/ConfirmDialog.jsx'
 import Spinner from '../../components/Spinner.jsx'
+
+function exportCSV(transactions) {
+  const header = 'Data,Tipo,Categoria,Descrição,Valor'
+  const rows = transactions.map(t =>
+    `${t.date},${t.type},${t.category || ''},"${(t.description || '').replace(/"/g, '""')}",${t.value}`
+  )
+  const csv = '\uFEFF' + [header, ...rows].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `fluxo-finlearn-${new Date().toISOString().slice(0, 10)}.csv`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
 
 export default function Fluxo() {
   const [transactions, setTransactions] = useState([])
   const [loading, setLoading] = useState(true)
   const [typeFilter, setTypeFilter] = useState('todos')
   const [monthFilter, setMonthFilter] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('')
   const [confirmId, setConfirmId] = useState(null)
 
   useEffect(() => {
     getFluxo().then(data => {
+      if (data.error) {
+        showToast('Erro ao carregar transações', 'error')
+        setLoading(false)
+        return
+      }
       setTransactions(Array.isArray(data) ? data.sort((a, b) => new Date(b.date) - new Date(a.date)) : [])
       setLoading(false)
     })
@@ -25,11 +51,16 @@ export default function Fluxo() {
 
   const months = useMemo(() => [...new Set(transactions.map(t => t.date?.slice(0, 7)))].sort().reverse(), [transactions])
 
+  const categories = useMemo(() =>
+    [...new Set(transactions.map(t => t.category).filter(Boolean))].sort()
+  , [transactions])
+
   const filtered = useMemo(() => transactions.filter(t => {
     if (typeFilter !== 'todos' && t.type !== typeFilter) return false
     if (monthFilter && !t.date?.startsWith(monthFilter)) return false
+    if (categoryFilter && t.category !== categoryFilter) return false
     return true
-  }), [transactions, typeFilter, monthFilter])
+  }), [transactions, typeFilter, monthFilter, categoryFilter])
 
   const totals = useMemo(() => ({
     gastos: filtered.filter(t => t.type === 'gasto').reduce((s, t) => s + t.value, 0),
@@ -63,9 +94,16 @@ export default function Fluxo() {
         onCancel={() => setConfirmId(null)}
       />
 
-      <div className="page-header">
-        <h1>Fluxo de Caixa</h1>
-        <p>Registre e acompanhe seus gastos e investimentos.</p>
+      <div className="page-header page-header-row">
+        <div>
+          <h1>Fluxo de Caixa</h1>
+          <p>Registre e acompanhe seus gastos e investimentos.</p>
+        </div>
+        {transactions.length > 0 && (
+          <button className="btn btn-secondary btn-sm" onClick={() => exportCSV(transactions)} title="Exportar todas as transações como CSV">
+            <Download size={14} /> Exportar CSV
+          </button>
+        )}
       </div>
       <div className="fluxo-layout">
         <TransactionForm onAdd={handleAdd} />
@@ -95,9 +133,20 @@ export default function Fluxo() {
           months={months}
           onTypeChange={setTypeFilter}
           onMonthChange={setMonthFilter}
+          categoryFilter={categoryFilter}
+          categories={categories}
+          onCategoryChange={setCategoryFilter}
         />
 
         <TransactionList transactions={filtered} onDelete={(id) => setConfirmId(id)} />
+
+        <EvolutionChart transactions={transactions} />
+
+        <BudgetManager transactions={filtered} monthFilter={monthFilter} />
+
+        <RecurringManager onGenerate={(newTxs) => {
+          setTransactions(prev => [...newTxs, ...prev].sort((a, b) => new Date(b.date) - new Date(a.date)))
+        }} />
       </div>
     </div>
   )

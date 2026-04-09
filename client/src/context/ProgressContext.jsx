@@ -5,9 +5,15 @@ const ProgressContext = createContext()
 
 export function ProgressProvider({ children }) {
   const [progress, setProgress] = useState(null)
+  const [error, setError] = useState(false)
 
   const refresh = useCallback(async () => {
     const data = await getProgress()
+    if (data.error) {
+      setError(true)
+      return
+    }
+    setError(false)
     setProgress(data)
   }, [])
 
@@ -24,7 +30,7 @@ export function ProgressProvider({ children }) {
   }
 
   return (
-    <ProgressContext.Provider value={{ progress, refreshProgress: refresh, markLesson, resetProgress: reset }}>
+    <ProgressContext.Provider value={{ progress, error, refreshProgress: refresh, markLesson, resetProgress: reset }}>
       {children}
     </ProgressContext.Provider>
   )
