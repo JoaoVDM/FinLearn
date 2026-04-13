@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { AlertTriangle } from 'lucide-react'
 
 export default function ConfirmDialog({ open, title, message, confirmLabel = 'Confirmar', danger = false, onConfirm, onCancel }) {
@@ -11,10 +12,10 @@ export default function ConfirmDialog({ open, title, message, confirmLabel = 'Co
 
   if (!open) return null
 
-  return (
+  return createPortal(
     <div className="modal-backdrop" onClick={onCancel} role="presentation">
       <div
-        className="modal-content fade-in"
+        className="modal-content"
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="dialog-title"
@@ -29,6 +30,7 @@ export default function ConfirmDialog({ open, title, message, confirmLabel = 'Co
           <button className={`btn ${danger ? 'btn-danger' : 'btn-primary'}`} onClick={onConfirm}>{confirmLabel}</button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

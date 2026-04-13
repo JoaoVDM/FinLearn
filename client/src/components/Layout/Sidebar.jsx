@@ -1,17 +1,18 @@
 import { NavLink } from 'react-router-dom'
-import { Home, BookOpen, BookMarked, Calculator, Target, Wallet, Sun, Moon, TrendingUp } from 'lucide-react'
+import { Home, BookOpen, BookMarked, Calculator, Target, Wallet, Sun, Moon, TrendingUp, NotebookPen } from 'lucide-react'
 import { useTheme } from '../../context/ThemeContext.jsx'
 
 const NAV_MAIN = [
-  { to: '/',       label: 'Início',               Icon: Home,       end: true },
-  { to: '/trilha', label: 'Trilha',               Icon: BookOpen          },
+  { to: '/',       label: 'Início',    Icon: Home,        end: true },
+  { to: '/trilha', label: 'Trilha',    Icon: BookOpen             },
+  { to: '/notas',  label: 'Anotações', Icon: NotebookPen          },
 ]
 
 const NAV_TOOLS = [
-  { to: '/glossario', label: 'Glossário',          Icon: BookMarked },
-  { to: '/simulador', label: 'Simulador',          Icon: Calculator },
-  { to: '/meta',      label: 'Metas',              Icon: Target     },
-  { to: '/fluxo',     label: 'Fluxo de Caixa',    Icon: Wallet     },
+  { to: '/glossario', label: 'Glossário',       Icon: BookMarked },
+  { to: '/simulador', label: 'Simulador',       Icon: Calculator },
+  { to: '/meta',      label: 'Metas',           Icon: Target     },
+  { to: '/fluxo',     label: 'Fluxo de Caixa', Icon: Wallet     },
 ]
 
 function NavGroup({ label, links, onClose }) {

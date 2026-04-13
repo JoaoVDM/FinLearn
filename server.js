@@ -142,6 +142,25 @@ app.post('/api/progresso/reset', wrap(async (req, res) => {
 
 // ── NOTAS ─────────────────────────────────────────────────────────────────────
 
+// GET /api/notes  — todas as notas com metadados da lição
+app.get('/api/notes', (req, res) => {
+  const data = readData();
+  const result = Object.entries(data.notes)
+    .filter(([, text]) => text && text.trim())
+    .map(([lessonId, text]) => {
+      const meta = lessonIndex.get(lessonId);
+      return {
+        lessonId,
+        text,
+        lessonTitle:  meta?.title       || lessonId,
+        moduleId:     meta?.moduleId    || null,
+        moduleTitle:  meta?.moduleTitle || null,
+      };
+    })
+    .sort((a, b) => String(a.moduleId).localeCompare(String(b.moduleId)));
+  res.json(result);
+});
+
 // GET /api/notes/:lessonId
 app.get('/api/notes/:lessonId', (req, res) => {
   const { lessonId } = req.params;
@@ -157,6 +176,16 @@ app.post('/api/notes/:lessonId', wrap(async (req, res) => {
   const { text } = req.body;
   const data = readData();
   data.notes[lessonId] = String(text || '').slice(0, 2000);
+  await writeData(data);
+  res.json({ success: true });
+}));
+
+// DELETE /api/notes/:lessonId
+app.delete('/api/notes/:lessonId', wrap(async (req, res) => {
+  const { lessonId } = req.params;
+  if (!validLessonIds.has(lessonId)) return res.status(400).json({ error: 'lessonId inválido' });
+  const data = readData();
+  delete data.notes[lessonId];
   await writeData(data);
   res.json({ success: true });
 }));

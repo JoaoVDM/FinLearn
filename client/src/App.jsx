@@ -8,6 +8,7 @@ import Glossario from './pages/Glossario.jsx'
 import Simulador from './pages/Simulador/Simulador.jsx'
 import Meta from './pages/Meta/Meta.jsx'
 import Fluxo from './pages/Fluxo/Fluxo.jsx'
+import Notas from './pages/Notas/Notas.jsx'
 import NotFound from './pages/NotFound.jsx'
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="simulador" element={<Simulador />} />
           <Route path="meta" element={<Meta />} />
           <Route path="fluxo" element={<Fluxo />} />
+          <Route path="notas" element={<Notas />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
