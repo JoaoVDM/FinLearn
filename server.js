@@ -5,7 +5,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
-const PORT = 3001;
+const PORT = 3004;
 
 const DATA_FILE = path.join(__dirname, 'data.json');
 const CONTENT_FILE = path.join(__dirname, 'content.json');
@@ -70,7 +70,6 @@ function readData() {
 }
 
 async function writeData(data) {
-  _dataCache = data;
   const tmp = DATA_FILE + '.tmp';
   await fs.promises.writeFile(tmp, JSON.stringify(data, null, 2));
   try {
@@ -80,6 +79,7 @@ async function writeData(data) {
     await fs.promises.copyFile(tmp, DATA_FILE);
     await fs.promises.unlink(tmp).catch(() => {});
   }
+  _dataCache = data; // atualiza cache só após sucesso no disco
 }
 
 // Wrapper para rotas async — evita promessas não tratadas
@@ -177,6 +177,9 @@ app.post('/api/quiz/:modulo', wrap(async (req, res) => {
   const { score, total, answers } = req.body;
   if (score === undefined || total === undefined) {
     return res.status(400).json({ error: 'score e total são obrigatórios' });
+  }
+  if (typeof total !== 'number' || total <= 0) {
+    return res.status(400).json({ error: 'total deve ser um número maior que zero' });
   }
   const data = readData();
   data.quizScores[modulo] = {

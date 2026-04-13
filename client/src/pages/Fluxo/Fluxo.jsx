@@ -105,48 +105,53 @@ export default function Fluxo() {
           </button>
         )}
       </div>
-      <div className="fluxo-layout">
-        <TransactionForm onAdd={handleAdd} />
 
-        <div className="summary-cards">
-          <div className="summary-card gastos">
-            <div className="summary-card-label"><CreditCard size={14} /> Gastos</div>
-            <div className="summary-card-value">{fmtCurrency(totals.gastos)}</div>
-          </div>
-          <div className="summary-card investimentos">
-            <div className="summary-card-label"><TrendingUp size={14} /> Investimentos</div>
-            <div className="summary-card-value">{fmtCurrency(totals.investimentos)}</div>
-          </div>
-          <div className={`summary-card saldo ${saldo >= 0 ? 'positive' : ''}`}>
-            <div className="summary-card-label"><Scale size={14} /> Saldo</div>
-            <div className="summary-card-value" style={{ color: saldo >= 0 ? 'var(--accent)' : 'var(--danger)' }}>
-              {fmtCurrency(saldo)}
-            </div>
+      {/* Summary cards — largura total antes do grid */}
+      <div className="summary-cards">
+        <div className="summary-card gastos">
+          <div className="summary-card-label"><CreditCard size={14} /> Gastos</div>
+          <div className="summary-card-value">{fmtCurrency(totals.gastos)}</div>
+        </div>
+        <div className="summary-card investimentos">
+          <div className="summary-card-label"><TrendingUp size={14} /> Investimentos</div>
+          <div className="summary-card-value">{fmtCurrency(totals.investimentos)}</div>
+        </div>
+        <div className={`summary-card saldo ${saldo >= 0 ? 'positive' : ''}`}>
+          <div className="summary-card-label"><Scale size={14} /> Saldo</div>
+          <div className="summary-card-value" style={{ color: saldo >= 0 ? 'var(--accent)' : 'var(--danger)' }}>
+            {fmtCurrency(saldo)}
           </div>
         </div>
+      </div>
 
-        <FluxoChart
-          gastos={totals.gastos}
-          investimentos={totals.investimentos}
-          typeFilter={typeFilter}
-          monthFilter={monthFilter}
-          months={months}
-          onTypeChange={setTypeFilter}
-          onMonthChange={setMonthFilter}
-          categoryFilter={categoryFilter}
-          categories={categories}
-          onCategoryChange={setCategoryFilter}
-        />
+      {/* Grid 2 colunas */}
+      <div className="fluxo-layout">
+        {/* Coluna esquerda: formulário + lista de transações */}
+        <div className="fluxo-col-left">
+          <TransactionForm onAdd={handleAdd} />
+          <TransactionList transactions={filtered} onDelete={(id) => setConfirmId(id)} />
+        </div>
 
-        <TransactionList transactions={filtered} onDelete={(id) => setConfirmId(id)} />
-
-        <EvolutionChart transactions={transactions} />
-
-        <BudgetManager transactions={filtered} monthFilter={monthFilter} />
-
-        <RecurringManager onGenerate={(newTxs) => {
-          setTransactions(prev => [...newTxs, ...prev].sort((a, b) => new Date(b.date) - new Date(a.date)))
-        }} />
+        {/* Coluna direita: gráficos e ferramentas */}
+        <div className="fluxo-col-right">
+          <FluxoChart
+            gastos={totals.gastos}
+            investimentos={totals.investimentos}
+            typeFilter={typeFilter}
+            monthFilter={monthFilter}
+            months={months}
+            onTypeChange={setTypeFilter}
+            onMonthChange={setMonthFilter}
+            categoryFilter={categoryFilter}
+            categories={categories}
+            onCategoryChange={setCategoryFilter}
+          />
+          <EvolutionChart transactions={transactions} />
+          <BudgetManager transactions={filtered} monthFilter={monthFilter} />
+          <RecurringManager onGenerate={(newTxs) => {
+            setTransactions(prev => [...newTxs, ...prev].sort((a, b) => new Date(b.date) - new Date(a.date)))
+          }} />
+        </div>
       </div>
     </div>
   )

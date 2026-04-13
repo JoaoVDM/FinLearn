@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Line } from 'react-chartjs-2'
 import { fmtCurrency, fmtMonth } from '../../utils/format.js'
+import { useThemeChart } from '../../hooks/useThemeChart.js'
 
 const PERIODS = [
   { label: '3 meses', value: 3 },
@@ -11,6 +12,7 @@ const PERIODS = [
 
 export default function EvolutionChart({ transactions }) {
   const [period, setPeriod] = useState(6)
+  const { tickColor, gridColor, legendColor, tooltipBg, tooltipText, tooltipBorder } = useThemeChart()
 
   const monthlyData = useMemo(() => {
     const map = {}
@@ -29,31 +31,31 @@ export default function EvolutionChart({ transactions }) {
   if (monthlyData.length === 0) return null
 
   const labels = monthlyData.map(d => fmtMonth(d.month))
-  const gastosData = monthlyData.map(d => d.gastos)
-  const investData = monthlyData.map(d => d.investimentos)
 
   const data = {
     labels,
     datasets: [
       {
         label: 'Gastos',
-        data: gastosData,
+        data: monthlyData.map(d => d.gastos),
         borderColor: 'rgb(239,68,68)',
         backgroundColor: 'rgba(239,68,68,0.08)',
         fill: true,
         tension: 0.3,
         pointRadius: 4,
         pointHoverRadius: 6,
+        pointBackgroundColor: 'rgb(239,68,68)',
       },
       {
         label: 'Investimentos',
-        data: investData,
+        data: monthlyData.map(d => d.investimentos),
         borderColor: 'rgb(0,200,150)',
         backgroundColor: 'rgba(0,200,150,0.08)',
         fill: true,
         tension: 0.3,
         pointRadius: 4,
         pointHoverRadius: 6,
+        pointBackgroundColor: 'rgb(0,200,150)',
       },
     ],
   }
@@ -65,9 +67,20 @@ export default function EvolutionChart({ transactions }) {
     plugins: {
       legend: {
         display: true,
-        labels: { boxWidth: 10, padding: 16, color: 'var(--text-secondary)', font: { size: 12 } },
+        labels: {
+          boxWidth: 10,
+          padding: 16,
+          color: legendColor,
+          font: { size: 12 },
+        },
       },
       tooltip: {
+        backgroundColor: tooltipBg,
+        titleColor: tooltipText,
+        bodyColor: tooltipText,
+        borderColor: tooltipBorder,
+        borderWidth: 1,
+        padding: 10,
         callbacks: {
           label: (ctx) => ` ${ctx.dataset.label}: ${fmtCurrency(ctx.raw)}`,
         },
@@ -75,12 +88,20 @@ export default function EvolutionChart({ transactions }) {
     },
     scales: {
       x: {
-        ticks: { color: 'var(--text-muted)', font: { size: 11 }, maxRotation: 40 },
-        grid: { color: 'rgba(128,128,128,0.1)' },
+        ticks: {
+          color: tickColor,
+          font: { size: 11 },
+          maxRotation: 40,
+        },
+        grid: { color: gridColor },
       },
       y: {
-        ticks: { color: 'var(--text-muted)', font: { size: 11 }, callback: (v) => fmtCurrency(v) },
-        grid: { color: 'rgba(128,128,128,0.1)' },
+        ticks: {
+          color: tickColor,
+          font: { size: 11 },
+          callback: (v) => fmtCurrency(v),
+        },
+        grid: { color: gridColor },
       },
     },
   }

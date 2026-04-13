@@ -38,6 +38,7 @@ export default function Quiz() {
 
   useEffect(() => {
     getQuiz(modulo).then(data => {
+      if (data.error) { dispatch({ type: 'LOADED', questions: [] }); return }
       const questions = data.questions || data
       if (!Array.isArray(questions) || !questions.length) return
       dispatch({ type: 'LOADED', questions: shuffleOptions(questions) })
@@ -75,6 +76,14 @@ export default function Quiz() {
   }, [state.done])
 
   if (state.loading) return <Spinner />
+
+  if (!state.loading && state.questions.length === 0) {
+    return (
+      <div className="page-content fade-in" style={{ textAlign: 'center', paddingTop: 64 }}>
+        <p style={{ color: 'var(--text-muted)' }}>Quiz não encontrado ou indisponível.</p>
+      </div>
+    )
+  }
 
   if (!state.started) {
     const prevScore = progress?.quizScores?.[modulo]

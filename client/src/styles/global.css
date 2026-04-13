@@ -911,7 +911,7 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 }
 
 .module-lesson-count {
-  font-family: var(--font-mono);
+  font-family: var(--font);
   font-size: 0.78rem;
   color: var(--text-3);
 }
@@ -1050,7 +1050,7 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   font-weight: 700;
   color: var(--text-3);
   flex-shrink: 0;
-  font-family: var(--font-mono);
+  font-family: var(--font);
 }
 
 .lesson-list-item.done .lesson-number { background: var(--accent-glow); color: var(--accent); }
@@ -1347,7 +1347,7 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   font-size: 0.72rem; font-weight: 700;
   color: var(--text-3);
   flex-shrink: 0;
-  font-family: var(--font-mono);
+  font-family: var(--font);
 }
 
 .quiz-option.correct .option-label { background: var(--accent); color: #03180e; border-color: var(--accent); }
@@ -1460,7 +1460,26 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 .transaction-row { display: flex; gap: 8px; }
 .transaction-row .input { flex: 1; }
 
-.fluxo-layout { max-width: 720px; }
+.fluxo-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.fluxo-col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.fluxo-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
 
 .transaction-item {
   display: flex; align-items: center; gap: 12px;
@@ -1502,7 +1521,7 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 .summary-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px; margin: 18px 0;
+  gap: 10px; margin: 0 0 20px;
 }
 
 .summary-card {
@@ -1600,7 +1619,6 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 /* ─── EVOLUTION CHART ───────────────────────────────────── */
 .evolution-chart-card {
   padding: 20px;
-  margin-bottom: 16px;
 }
 .evolution-chart-header {
   display: flex;
@@ -1635,7 +1653,6 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 /* ─── BUDGET MANAGER ────────────────────────────────────── */
 .budget-manager-card {
   padding: 20px;
-  margin-bottom: 16px;
 }
 .budget-manager-header {
   display: flex;
@@ -1717,7 +1734,6 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 /* ─── RECURRING MANAGER ─────────────────────────────────── */
 .recurring-card {
   padding: 20px;
-  margin-bottom: 16px;
 }
 .recurring-header {
   display: flex;
@@ -1818,7 +1834,7 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 .quiz-result-score {
   font-size: 3rem; font-weight: 800; letter-spacing: -2px;
   color: var(--text-1); line-height: 1; margin-bottom: 8px;
-  font-family: var(--font-mono);
+  font-family: var(--font);
 }
 
 .quiz-result-emoji { font-size: 3rem; margin-bottom: 16px; display: block; }
@@ -1917,7 +1933,8 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   .sim-layout { flex-direction: column; }
   .sim-form   { width: 100%; position: static; top: auto; }
   .modules-grid { grid-template-columns: 1fr; }
-  .fluxo-layout { max-width: 100%; }
+  .fluxo-layout { grid-template-columns: 1fr; }
+  .fluxo-col-left, .fluxo-col-right { gap: 12px; }
 }
 
 @media (max-width: 768px) {

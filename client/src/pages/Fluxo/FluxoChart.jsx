@@ -34,7 +34,7 @@ export default function FluxoChart({ gastos, investimentos, typeFilter, monthFil
   }
 
   return (
-    <div className="card" style={{ padding: 24, marginBottom: 16, overflow: 'visible' }}>
+    <div className="card" style={{ padding: 24, overflow: 'visible' }}>
       {/* Filtros no topo */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         <select value={typeFilter} onChange={e => onTypeChange(e.target.value)} style={{ flex: 1, minWidth: 130 }}>
