@@ -5,17 +5,20 @@ import { fmt, fmtCurrency } from '../../utils/format.js'
 import CompoundChart from './CompoundChart.jsx'
 
 const PRESETS = [
-  { label: 'Conservador', initial: 1000, monthly: 500, rate: 0.8, months: 120 },
-  { label: 'Moderado', initial: 5000, monthly: 1000, rate: 1.0, months: 180 },
-  { label: 'Arrojado', initial: 10000, monthly: 2000, rate: 1.2, months: 240 },
+  { label: 'Conservador', desc: 'Renda fixa · baixo risco',       initial: 1000,  monthly: 500,  rate: 0.8, months: 120 },
+  { label: 'Moderado',    desc: 'Mix de ativos · médio prazo',    initial: 5000,  monthly: 1000, rate: 1.0, months: 180 },
+  { label: 'Arrojado',    desc: 'Renda variável · longo prazo',   initial: 10000, monthly: 2000, rate: 1.2, months: 240 },
 ]
 
 function loadScenarios() {
   try { return JSON.parse(localStorage.getItem('fl_scenarios') || '[]') } catch { return [] }
 }
-
 function persistScenarios(list) {
   try { localStorage.setItem('fl_scenarios', JSON.stringify(list)) } catch {}
+}
+function isActive(form, rateMode, p) {
+  return rateMode === 'month' && form.initial === p.initial &&
+    form.monthly === p.monthly && form.rate === p.rate && form.months === p.months
 }
 
 export default function Simulador() {
@@ -31,18 +34,16 @@ export default function Simulador() {
   }, [form, rateMode])
 
   const last = rows[rows.length - 1]
-  const applyPreset = (p) => { setForm(p); setRateMode('month') }
+  const roi        = last && last.totalInvested > 0 ? ((last.earnings / last.totalInvested) * 100).toFixed(1) : '0.0'
+  const multiplier = last && last.totalInvested > 0 ? (last.balance / last.totalInvested).toFixed(2) : '1.00'
 
-  const saveScenario = () => {
-    if (scenarios.length >= 3) {
-      const updated = [...scenarios.slice(1), buildScenario()]
-      setScenarios(updated)
-      persistScenarios(updated)
-    } else {
-      const updated = [...scenarios, buildScenario()]
-      setScenarios(updated)
-      persistScenarios(updated)
-    }
+  const applyPreset = (p) => { setForm({ initial: p.initial, monthly: p.monthly, rate: p.rate, months: p.months }); setRateMode('month') }
+
+  const toggleRate = () => {
+    const next = rateMode === 'month' ? 'year' : 'month'
+    const converted = convertRate(form.rate, rateMode, next)
+    setRateMode(next)
+    set('rate', +converted.toFixed(4))
   }
 
   const buildScenario = () => {
@@ -52,15 +53,19 @@ export default function Simulador() {
     return {
       id: Date.now(),
       label: `Cenário ${scenarios.length + 1}`,
-      initial: form.initial,
-      monthly: form.monthly,
-      rate: form.rate,
-      rateMode,
-      months: form.months,
+      initial: form.initial, monthly: form.monthly,
+      rate: form.rate, rateMode, months: form.months,
       balance: l?.balance || 0,
       totalInvested: l?.totalInvested || 0,
       earnings: l?.earnings || 0,
     }
+  }
+
+  const saveScenario = () => {
+    const s = buildScenario()
+    const updated = scenarios.length >= 3 ? [...scenarios.slice(1), s] : [...scenarios, s]
+    setScenarios(updated)
+    persistScenarios(updated)
   }
 
   const removeScenario = (id) => {
@@ -75,112 +80,151 @@ export default function Simulador() {
         <h1>Simulador de Juros Compostos</h1>
         <p>Visualize o crescimento do seu patrimônio com aportes mensais.</p>
       </div>
-      <div className="preset-btns" style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+
+      <div className="sim-presets">
         {PRESETS.map(p => (
-          <button key={p.label} className="btn btn-secondary" onClick={() => applyPreset(p)}>{p.label}</button>
+          <button
+            key={p.label}
+            className={`sim-preset-btn${isActive(form, rateMode, p) ? ' active' : ''}`}
+            onClick={() => applyPreset(p)}
+          >
+            <span className="sim-preset-label">{p.label}</span>
+            <span className="sim-preset-desc">{p.desc}</span>
+          </button>
         ))}
       </div>
+
       <div className="sim-layout">
+        {/* ── Coluna esquerda: formulário ── */}
         <div className="sim-form card">
+          <p className="sim-form-title">Parâmetros</p>
+
           <div className="form-group">
-            <label>Capital inicial (R$)</label>
-            <input type="number" className="input" value={form.initial} onChange={e => set('initial', +e.target.value)} />
+            <label>Capital inicial</label>
+            <div className="sim-input-prefix">
+              <span>R$</span>
+              <input type="number" className="input" value={form.initial} min={0}
+                onChange={e => set('initial', +e.target.value)} />
+            </div>
           </div>
+
           <div className="form-group">
-            <label>Aporte mensal (R$)</label>
-            <input type="number" className="input" value={form.monthly} onChange={e => set('monthly', +e.target.value)} />
+            <label>Aporte mensal</label>
+            <div className="sim-input-prefix">
+              <span>R$</span>
+              <input type="number" className="input" value={form.monthly} min={0}
+                onChange={e => set('monthly', +e.target.value)} />
+            </div>
           </div>
+
+          <div className="form-group">
+            <label>Taxa de juros</label>
+            <div className="sim-rate-toggle">
+              <button className={rateMode === 'month' ? 'active' : ''} onClick={() => rateMode !== 'month' && toggleRate()}>a.m.</button>
+              <button className={rateMode === 'year'  ? 'active' : ''} onClick={() => rateMode !== 'year'  && toggleRate()}>a.a.</button>
+            </div>
+            <div className="sim-input-suffix">
+              <input type="number" step="0.01" className="input" value={form.rate} min={0}
+                onChange={e => set('rate', +e.target.value)} />
+              <span>%</span>
+            </div>
+          </div>
+
           <div className="form-group">
             <label>
-              Taxa ({rateMode === 'month' ? 'ao mês' : 'ao ano'} %)
-              <button className="btn-link" style={{ marginLeft: 8 }} onClick={() => {
-                const next = rateMode === 'month' ? 'year' : 'month'
-                const converted = convertRate(form.rate, rateMode, next)
-                setRateMode(next)
-                set('rate', +converted.toFixed(4))
-              }}>
-                Trocar para {rateMode === 'month' ? 'ano' : 'mês'}
-              </button>
+              Período
+              <span className="sim-period-hint">{Math.round(form.months / 12 * 10) / 10} anos</span>
             </label>
-            <input type="number" step="0.01" className="input" value={form.rate} onChange={e => set('rate', +e.target.value)} />
+            <input type="number" className="input" value={form.months} min={1} max={600}
+              onChange={e => set('months', +e.target.value)} />
           </div>
-          <div className="form-group">
-            <label>Período (meses)</label>
-            <input type="number" className="input" value={form.months} onChange={e => set('months', +e.target.value)} min={1} max={600} />
-          </div>
-          {last && (
-            <div className="result-summary" style={{ marginTop: 16 }}>
-              <div className="result-item"><span>Patrimônio final</span><strong>{fmtCurrency(last.balance)}</strong></div>
-              <div className="result-item"><span>Total investido</span><strong>{fmtCurrency(last.totalInvested)}</strong></div>
-              <div className="result-item"><span>Rendimentos</span><strong style={{ color: 'var(--accent)' }}>{fmtCurrency(last.earnings)}</strong></div>
-            </div>
-          )}
-          <button className="btn btn-secondary w-full" style={{ marginTop: 12 }} onClick={saveScenario} disabled={!last}>
-            <Bookmark size={14} /> Salvar cenário {scenarios.length >= 3 ? '(substitui o mais antigo)' : ''}
+
+          <button className="btn btn-secondary w-full" style={{ marginTop: 8 }} onClick={saveScenario} disabled={!last}>
+            <Bookmark size={14} />
+            {scenarios.length >= 3 ? 'Salvar (substitui mais antigo)' : 'Salvar cenário'}
           </button>
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <CompoundChart rows={rows} />
-          {rows.length > 0 && (
-            <div style={{ overflowX: 'auto', marginTop: 24 }}>
-              <table className="data-table">
-                <thead><tr><th>Ano</th><th>Investido</th><th>Rendimentos</th><th>Patrimônio</th></tr></thead>
-                <tbody>
-                  {rows.map(r => (
-                    <tr key={r.year}>
-                      <td>{r.year}</td>
-                      <td>{fmtCurrency(r.totalInvested)}</td>
-                      <td style={{ color: 'var(--accent)' }}>{fmtCurrency(r.earnings)}</td>
-                      <td><strong>{fmtCurrency(r.balance)}</strong></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+
+        {/* ── Coluna direita: resultados ── */}
+        <div className="sim-results">
+          {last && (
+            <div className="sim-stats-grid">
+              <div className="sim-stat-card featured">
+                <span className="sim-stat-label">Patrimônio final</span>
+                <span className="sim-stat-value">{fmtCurrency(last.balance)}</span>
+                <span className="sim-stat-sub">{multiplier}× o valor investido</span>
+              </div>
+              <div className="sim-stat-card">
+                <span className="sim-stat-label">Total investido</span>
+                <span className="sim-stat-value muted">{fmtCurrency(last.totalInvested)}</span>
+                <span className="sim-stat-sub">capital + aportes</span>
+              </div>
+              <div className="sim-stat-card">
+                <span className="sim-stat-label">Rendimentos</span>
+                <span className="sim-stat-value accent">{fmtCurrency(last.earnings)}</span>
+                <span className="sim-stat-sub">ROI {roi}%</span>
+              </div>
             </div>
+          )}
+
+          <div className="sim-chart-card card">
+            <div className="sim-chart-header">
+              <span>Evolução patrimonial</span>
+              {last && <span className="sim-multiplier-badge">{multiplier}×</span>}
+            </div>
+            <CompoundChart rows={rows} />
+          </div>
+
+          {rows.length > 0 && (
+            <details className="sim-table-details card">
+              <summary>Tabela por ano ({rows.length} {rows.length === 1 ? 'ano' : 'anos'})</summary>
+              <div style={{ overflowX: 'auto', marginTop: 12 }}>
+                <table className="data-table">
+                  <thead>
+                    <tr><th>Ano</th><th>Investido</th><th>Rendimentos</th><th>Patrimônio</th></tr>
+                  </thead>
+                  <tbody>
+                    {rows.map(r => (
+                      <tr key={r.year}>
+                        <td>{r.year}</td>
+                        <td>{fmtCurrency(r.totalInvested)}</td>
+                        <td style={{ color: 'var(--accent)' }}>{fmtCurrency(r.earnings)}</td>
+                        <td><strong>{fmtCurrency(r.balance)}</strong></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </details>
           )}
         </div>
       </div>
 
       {scenarios.length > 0 && (
-        <div style={{ marginTop: 32 }}>
-          <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, marginBottom: 16 }}>Comparação de cenários</h2>
-          <div style={{ overflowX: 'auto' }}>
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th style={{ textAlign: 'left' }}>Cenário</th>
-                  <th>Capital inicial</th>
-                  <th>Aporte/mês</th>
-                  <th>Taxa</th>
-                  <th>Meses</th>
-                  <th>Total investido</th>
-                  <th>Rendimentos</th>
-                  <th>Patrimônio final</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {scenarios.map(s => (
-                  <tr key={s.id}>
-                    <td style={{ fontWeight: 600 }}>{s.label}</td>
-                    <td>{fmtCurrency(s.initial)}</td>
-                    <td>{fmtCurrency(s.monthly)}</td>
-                    <td>{fmt(s.rate)}% {s.rateMode === 'year' ? 'a.a.' : 'a.m.'}</td>
-                    <td>{s.months}</td>
-                    <td>{fmtCurrency(s.totalInvested)}</td>
-                    <td style={{ color: 'var(--accent)' }}>{fmtCurrency(s.earnings)}</td>
-                    <td><strong>{fmtCurrency(s.balance)}</strong></td>
-                    <td>
-                      <button className="btn-delete" onClick={() => removeScenario(s.id)} title="Remover cenário" aria-label="Remover cenário">
-                        <Trash2 size={14} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <section style={{ marginTop: 40 }}>
+          <h2 className="section-title">Comparação de cenários</h2>
+          <div className="sim-scenarios-grid">
+            {scenarios.map(s => (
+              <div key={s.id} className="sim-scenario-card card">
+                <div className="sim-scenario-header">
+                  <span className="sim-scenario-label">{s.label}</span>
+                  <button className="btn-delete" onClick={() => removeScenario(s.id)} title="Remover" aria-label="Remover cenário">
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+                <div className="sim-scenario-balance">{fmtCurrency(s.balance)}</div>
+                <div className="sim-scenario-meta">
+                  <span>{fmtCurrency(s.initial)} inicial · {fmtCurrency(s.monthly)}/mês</span>
+                  <span>{fmt(s.rate)}% {s.rateMode === 'year' ? 'a.a.' : 'a.m.'} · {s.months} meses</span>
+                </div>
+                <div className="sim-scenario-breakdown">
+                  <span>Investido <strong>{fmtCurrency(s.totalInvested)}</strong></span>
+                  <span style={{ color: 'var(--accent)' }}>Rendimentos <strong>{fmtCurrency(s.earnings)}</strong></span>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
+        </section>
       )}
     </div>
   )
