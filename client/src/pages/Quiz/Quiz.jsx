@@ -69,7 +69,15 @@ export default function Quiz() {
   useEffect(() => {
     if (state.done && state.questions.length > 0) {
       const score = state.answers.filter((a, i) => a === state.questions[i].correct).length
-      postQuizScore(modulo, score, state.questions.length, state.answers).then(() => {
+      const wrongItems = state.questions
+        .map((q, i) => ({
+          question: q.question,
+          chosen: q.options[state.answers[i]],
+          correct: q.options[q.correct],
+          explanation: q.explanation
+        }))
+        .filter((_, i) => state.answers[i] !== state.questions[i].correct)
+      postQuizScore(modulo, score, state.questions.length, state.answers, wrongItems).then(() => {
         refreshProgress()
       })
     }

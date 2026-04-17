@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Home, BookOpen, BookMarked, Calculator, Target, Wallet, Sun, Moon, TrendingUp, NotebookPen } from 'lucide-react'
+import { Home, BookOpen, BookMarked, Calculator, Target, Wallet, Sun, Moon, TrendingUp, NotebookPen, Search } from 'lucide-react'
 import { useTheme } from '../../context/ThemeContext.jsx'
 
 const NAV_MAIN = [
@@ -53,6 +53,9 @@ export default function Sidebar({ isOpen, onClose }) {
       </nav>
 
       <div className="sidebar-footer">
+        <button className="search-trigger" onClick={() => window.dispatchEvent(new Event('finlearn:search'))} aria-label="Pesquisa global">
+          <Search size={14} /> Pesquisar <kbd>Ctrl K</kbd>
+        </button>
         <button className="theme-toggle" onClick={toggleTheme} aria-label="Alternar tema">
           {theme === 'dark'
             ? <><Sun size={14} /> Tema Claro</>

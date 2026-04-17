@@ -1,12 +1,14 @@
 import { useEffect, useState, useMemo, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import { Search, X, SearchX } from 'lucide-react'
 import { getGlossary } from '../services/api.js'
 import Spinner from '../components/Spinner.jsx'
 import EmptyState from '../components/EmptyState.jsx'
 
 export default function Glossario() {
+  const location = useLocation()
   const [terms, setTerms] = useState([])
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(location.state?.term || '')
   const [loading, setLoading] = useState(true)
   const letterRefs = useRef({})
 

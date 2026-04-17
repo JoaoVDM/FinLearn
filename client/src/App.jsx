@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard/Dashboard.jsx'
 import Trilha from './pages/Trilha/Trilha.jsx'
 import Licao from './pages/Licao/Licao.jsx'
 import Quiz from './pages/Quiz/Quiz.jsx'
+import QuizReview from './pages/Quiz/QuizReview.jsx'
 import Glossario from './pages/Glossario.jsx'
 import Simulador from './pages/Simulador/Simulador.jsx'
 import Meta from './pages/Meta/Meta.jsx'
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="trilha" element={<Trilha />} />
           <Route path="licao/:id" element={<Licao />} />
           <Route path="quiz/:modulo" element={<Quiz />} />
+          <Route path="quiz/:modulo/revisao" element={<QuizReview />} />
           <Route path="glossario" element={<Glossario />} />
           <Route path="simulador" element={<Simulador />} />
           <Route path="meta" element={<Meta />} />

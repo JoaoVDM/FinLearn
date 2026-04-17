@@ -41,7 +41,7 @@ content.modules.forEach(m => {
   });
 });
 
-const VALID_TYPES = new Set(['gasto', 'investimento']);
+const VALID_TYPES = new Set(['gasto', 'investimento', 'receita']);
 
 // ── PERSISTÊNCIA COM CACHE ────────────────────────────────────────────────────
 let _dataCache = null;
@@ -69,17 +69,23 @@ function readData() {
   }
 }
 
+// Fila de escrita: garante que writes concorrentes não se sobrescrevam
+let _writeQueue = Promise.resolve();
+
 async function writeData(data) {
-  const tmp = DATA_FILE + '.tmp';
-  await fs.promises.writeFile(tmp, JSON.stringify(data, null, 2));
-  try {
-    await fs.promises.rename(tmp, DATA_FILE);
-  } catch {
-    // Fallback para Windows (rename pode falhar se destino está bloqueado)
-    await fs.promises.copyFile(tmp, DATA_FILE);
-    await fs.promises.unlink(tmp).catch(() => {});
-  }
-  _dataCache = data; // atualiza cache só após sucesso no disco
+  _dataCache = data; // atualiza cache imediatamente para leituras subsequentes
+  _writeQueue = _writeQueue.then(async () => {
+    const tmp = DATA_FILE + '.tmp';
+    await fs.promises.writeFile(tmp, JSON.stringify(data, null, 2));
+    try {
+      await fs.promises.rename(tmp, DATA_FILE);
+    } catch {
+      // Fallback para Windows (rename pode falhar se destino está bloqueado)
+      await fs.promises.copyFile(tmp, DATA_FILE);
+      await fs.promises.unlink(tmp).catch(() => {});
+    }
+  }).catch(err => console.error('[writeData] falha ao persistir:', err.message));
+  return _writeQueue;
 }
 
 // Wrapper para rotas async — evita promessas não tratadas
@@ -203,7 +209,7 @@ app.get('/api/quiz/:modulo', (req, res) => {
 // POST /api/quiz/:modulo
 app.post('/api/quiz/:modulo', wrap(async (req, res) => {
   const { modulo } = req.params;
-  const { score, total, answers } = req.body;
+  const { score, total, answers, wrongItems } = req.body;
   if (score === undefined || total === undefined) {
     return res.status(400).json({ error: 'score e total são obrigatórios' });
   }
@@ -215,11 +221,28 @@ app.post('/api/quiz/:modulo', wrap(async (req, res) => {
     score, total,
     percent: Math.round((score / total) * 100),
     answers: answers || [],
+    wrongItems: Array.isArray(wrongItems) ? wrongItems : [],
     completedAt: new Date().toISOString()
   };
   await writeData(data);
   res.json({ success: true, quizScore: data.quizScores[modulo] });
 }));
+
+// GET /api/quiz/:modulo/review
+app.get('/api/quiz/:modulo/review', (req, res) => {
+  const { modulo } = req.params;
+  const data = readData();
+  const quizScore = data.quizScores[modulo];
+  if (!quizScore) return res.status(404).json({ error: 'Nenhuma tentativa salva para este módulo' });
+  res.json({
+    modulo,
+    score: quizScore.score,
+    total: quizScore.total,
+    percent: quizScore.percent,
+    completedAt: quizScore.completedAt,
+    wrongItems: quizScore.wrongItems || []
+  });
+});
 
 // ── FLUXO DE CAIXA ────────────────────────────────────────────────────────────
 
@@ -388,6 +411,48 @@ app.post('/api/recurring/generate/:month', wrap(async (req, res) => {
   await writeData(data);
   res.json({ success: true, count: generated.length, transactions: generated });
 }));
+
+// ── PESQUISA GLOBAL ───────────────────────────────────────────────────────────
+
+// GET /api/search?q=termo
+app.get('/api/search', (req, res) => {
+  const q = (req.query.q || '').trim().toLowerCase();
+  if (!q || q.length < 2) return res.json({ results: [] });
+
+  const results = [];
+  const data = readData();
+
+  // Pesquisar lições
+  content.modules.forEach(m => {
+    m.lessons.forEach(l => {
+      const haystack = `${l.title} ${l.id}`.toLowerCase();
+      if (haystack.includes(q)) {
+        results.push({ type: 'lesson', id: l.id, title: l.title, moduleId: m.id, moduleTitle: m.title });
+      }
+    });
+  });
+
+  // Pesquisar glossário
+  if (Array.isArray(content.glossary)) {
+    content.glossary.forEach(item => {
+      const haystack = `${item.term} ${item.definition}`.toLowerCase();
+      if (haystack.includes(q)) {
+        results.push({ type: 'glossary', term: item.term, definition: item.definition });
+      }
+    });
+  }
+
+  // Pesquisar notas
+  Object.entries(data.notes).forEach(([lessonId, text]) => {
+    if (!text || !text.trim()) return;
+    if (text.toLowerCase().includes(q)) {
+      const meta = lessonIndex.get(lessonId);
+      results.push({ type: 'note', lessonId, lessonTitle: meta?.title || lessonId, moduleTitle: meta?.moduleTitle || '', preview: text.slice(0, 120) });
+    }
+  });
+
+  res.json({ results: results.slice(0, 30) });
+});
 
 // ── ERROR HANDLER GLOBAL ──────────────────────────────────────────────────────
 // eslint-disable-next-line no-unused-vars

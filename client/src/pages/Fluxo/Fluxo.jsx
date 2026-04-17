@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from 'react'
-import { CreditCard, TrendingUp, Scale, Download } from 'lucide-react'
+import { CreditCard, TrendingUp, Wallet, Scale, Download } from 'lucide-react'
 import { getFluxo, deleteFluxo } from '../../services/api.js'
 import { showToast } from '../../components/Toast.jsx'
 import { fmtCurrency } from '../../utils/format.js'
@@ -65,9 +65,10 @@ export default function Fluxo() {
   const totals = useMemo(() => ({
     gastos: filtered.filter(t => t.type === 'gasto').reduce((s, t) => s + t.value, 0),
     investimentos: filtered.filter(t => t.type === 'investimento').reduce((s, t) => s + t.value, 0),
+    receitas: filtered.filter(t => t.type === 'receita').reduce((s, t) => s + t.value, 0),
   }), [filtered])
 
-  const saldo = totals.investimentos - totals.gastos
+  const saldo = totals.receitas - totals.gastos - totals.investimentos
 
   const handleAdd = useCallback((t) => {
     setTransactions(prev => [t, ...prev].sort((a, b) => new Date(b.date) - new Date(a.date)))
@@ -108,6 +109,10 @@ export default function Fluxo() {
 
       {/* Summary cards — largura total antes do grid */}
       <div className="summary-cards">
+        <div className="summary-card receitas">
+          <div className="summary-card-label"><Wallet size={14} /> Receitas</div>
+          <div className="summary-card-value" style={{ color: 'rgb(99,102,241)' }}>{fmtCurrency(totals.receitas)}</div>
+        </div>
         <div className="summary-card gastos">
           <div className="summary-card-label"><CreditCard size={14} /> Gastos</div>
           <div className="summary-card-value">{fmtCurrency(totals.gastos)}</div>
@@ -119,7 +124,7 @@ export default function Fluxo() {
         <div className={`summary-card saldo ${saldo >= 0 ? 'positive' : ''}`}>
           <div className="summary-card-label"><Scale size={14} /> Saldo</div>
           <div className="summary-card-value" style={{ color: saldo >= 0 ? 'var(--accent)' : 'var(--danger)' }}>
-            {fmtCurrency(saldo)}
+            {saldo >= 0 ? '+' : ''}{fmtCurrency(saldo)}
           </div>
         </div>
       </div>
@@ -137,6 +142,7 @@ export default function Fluxo() {
           <FluxoChart
             gastos={totals.gastos}
             investimentos={totals.investimentos}
+            receitas={totals.receitas}
             typeFilter={typeFilter}
             monthFilter={monthFilter}
             months={months}

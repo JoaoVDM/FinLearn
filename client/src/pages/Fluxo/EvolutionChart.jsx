@@ -19,9 +19,10 @@ export default function EvolutionChart({ transactions }) {
     for (const t of transactions) {
       const m = t.date?.slice(0, 7)
       if (!m) continue
-      if (!map[m]) map[m] = { gastos: 0, investimentos: 0 }
+      if (!map[m]) map[m] = { gastos: 0, investimentos: 0, receitas: 0 }
       if (t.type === 'gasto') map[m].gastos += t.value
       else if (t.type === 'investimento') map[m].investimentos += t.value
+      else if (t.type === 'receita') map[m].receitas += t.value
     }
     let months = Object.keys(map).sort()
     if (period > 0) months = months.slice(-period)
@@ -30,11 +31,20 @@ export default function EvolutionChart({ transactions }) {
 
   if (monthlyData.length === 0) return null
 
-  const labels = monthlyData.map(d => fmtMonth(d.month))
-
-  const data = {
-    labels,
+  const data = useMemo(() => ({
+    labels: monthlyData.map(d => fmtMonth(d.month)),
     datasets: [
+      {
+        label: 'Receitas',
+        data: monthlyData.map(d => d.receitas),
+        borderColor: 'rgb(99,102,241)',
+        backgroundColor: 'rgba(99,102,241,0.08)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        pointBackgroundColor: 'rgb(99,102,241)',
+      },
       {
         label: 'Gastos',
         data: monthlyData.map(d => d.gastos),
@@ -58,9 +68,9 @@ export default function EvolutionChart({ transactions }) {
         pointBackgroundColor: 'rgb(0,200,150)',
       },
     ],
-  }
+  }), [monthlyData])
 
-  const options = {
+  const options = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: true,
     interaction: { mode: 'index', intersect: false },
@@ -104,7 +114,7 @@ export default function EvolutionChart({ transactions }) {
         grid: { color: gridColor },
       },
     },
-  }
+  }), [legendColor, tooltipBg, tooltipText, tooltipBorder, tickColor, gridColor])
 
   return (
     <div className="card evolution-chart-card">

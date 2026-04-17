@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Play, ClipboardCheck, CheckCircle2, Clock, Circle } from 'lucide-react'
+import { Play, ClipboardCheck, CheckCircle2, Clock, Circle, AlertCircle } from 'lucide-react'
 import ProgressBar from '../../components/ProgressBar.jsx'
 import Badge from '../../components/Badge.jsx'
 import ModuleIcon from '../../utils/moduleIcons.jsx'
@@ -51,6 +51,11 @@ export default function ModuleCard({ module, moduleProgress, quizScore, complete
           {percent === 100 && (
             <Link to={`/quiz/${module.id}`} className="btn btn-secondary btn-sm">
               <ClipboardCheck size={12} /> Quiz
+            </Link>
+          )}
+          {quizScore && quizScore.percent < 100 && (
+            <Link to={`/quiz/${module.id}/revisao`} className="btn btn-secondary btn-sm">
+              <AlertCircle size={12} /> Revisar
             </Link>
           )}
         </div>

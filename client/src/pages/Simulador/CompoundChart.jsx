@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Line } from 'react-chartjs-2'
 import { useThemeChart } from '../../hooks/useThemeChart.js'
 import { fmt } from '../../utils/format.js'
@@ -6,7 +7,7 @@ export default function CompoundChart({ rows }) {
   const c = useThemeChart()
   if (!rows || rows.length === 0) return null
 
-  const data = {
+  const data = useMemo(() => ({
     labels: rows.map(r => `Ano ${r.year}`),
     datasets: [
       {
@@ -26,9 +27,9 @@ export default function CompoundChart({ rows }) {
         tension: 0.4,
       },
     ],
-  }
+  }), [rows, c.accentColor, c.accentLight, c.secondaryColor, c.secondaryLight])
 
-  const options = {
+  const options = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -44,7 +45,7 @@ export default function CompoundChart({ rows }) {
       x: { ticks: { color: c.tickColor }, grid: { color: c.gridColor } },
       y: { ticks: { color: c.tickColor, callback: v => 'R$ ' + fmt(v) }, grid: { color: c.gridColor } },
     }
-  }
+  }), [c.legendColor, c.tooltipBg, c.tooltipText, c.tickColor, c.gridColor])
 
   return (
     <div style={{ height: 320, marginTop: 24 }}>

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Check, ClipboardCheck } from 'lucide-react'
+import { Check, ClipboardCheck, AlertCircle } from 'lucide-react'
 import ProgressBar from '../../components/ProgressBar.jsx'
 import Badge from '../../components/Badge.jsx'
 import ModuleIcon from '../../utils/moduleIcons.jsx'
@@ -38,11 +38,18 @@ export default function ModuleSection({ module, moduleProgress, quizScore, compl
         })}
       </div>
 
-      {percent === 100 && (
-        <div style={{ marginTop: 16 }}>
-          <Link to={`/quiz/${module.id}`} className="btn btn-primary btn-sm">
-            <ClipboardCheck size={14} /> Fazer Quiz do Módulo
-          </Link>
+      {(percent === 100 || quizScore) && (
+        <div className="button-group" style={{ marginTop: 16 }}>
+          {percent === 100 && (
+            <Link to={`/quiz/${module.id}`} className="btn btn-primary btn-sm">
+              <ClipboardCheck size={14} /> {quizScore ? 'Refazer Quiz' : 'Fazer Quiz do Módulo'}
+            </Link>
+          )}
+          {quizScore && quizScore.percent < 100 && (
+            <Link to={`/quiz/${module.id}/revisao`} className="btn btn-secondary btn-sm">
+              <AlertCircle size={14} /> Revisar erros
+            </Link>
+          )}
         </div>
       )}
     </div>

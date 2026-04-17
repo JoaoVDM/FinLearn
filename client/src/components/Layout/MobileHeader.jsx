@@ -1,6 +1,6 @@
-import { Menu, TrendingUp } from 'lucide-react'
+import { Menu, TrendingUp, Search } from 'lucide-react'
 
-export default function MobileHeader({ onMenuClick }) {
+export default function MobileHeader({ onMenuClick, onSearchClick }) {
   return (
     <header className="mobile-header">
       <button className="hamburger" onClick={onMenuClick} aria-label="Abrir menu">
@@ -12,7 +12,9 @@ export default function MobileHeader({ onMenuClick }) {
         </div>
         <span>FinLearn</span>
       </div>
-      <div style={{ width: 36 }} />
+      <button className="hamburger" onClick={onSearchClick} aria-label="Pesquisar">
+        <Search size={18} />
+      </button>
     </header>
   )
 }

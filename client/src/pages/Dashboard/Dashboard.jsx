@@ -158,8 +158,10 @@ export default function Dashboard() {
         <h2 className="section-title">Ferramentas</h2>
         <div className="quick-links-grid">
           {TOOLS.map(({ to, Icon, label, desc }) => (
-            <Link key={to} to={to} className="quick-link-card card">
-              <Icon size={26} color="var(--accent)" className="quick-link-icon" />
+            <Link key={to} to={to} className="quick-link-card">
+              <div className="quick-link-icon">
+                <Icon size={22} color="var(--accent)" />
+              </div>
               <div>
                 <div className="quick-link-label">{label}</div>
                 <div className="quick-link-desc">{desc}</div>

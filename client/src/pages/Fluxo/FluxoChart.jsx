@@ -1,23 +1,24 @@
+import { useMemo } from 'react'
 import { Doughnut } from 'react-chartjs-2'
 import { fmtCurrency, fmtMonth } from '../../utils/format.js'
 
-export default function FluxoChart({ gastos, investimentos, typeFilter, monthFilter, months, onTypeChange, onMonthChange, categoryFilter, categories, onCategoryChange }) {
-  const total = gastos + investimentos
-  const saldo = investimentos - gastos
+export default function FluxoChart({ gastos, investimentos, receitas, typeFilter, monthFilter, months, onTypeChange, onMonthChange, categoryFilter, categories, onCategoryChange }) {
+  const total = gastos + investimentos + receitas
+  const saldo = receitas - gastos - investimentos
   const saldoPositivo = saldo >= 0
 
-  const data = {
-    labels: ['Gastos', 'Investimentos'],
+  const data = useMemo(() => ({
+    labels: ['Gastos', 'Investimentos', 'Receitas'],
     datasets: [{
-      data: [gastos || 0, investimentos || 0],
-      backgroundColor: ['rgba(239,68,68,0.8)', 'rgba(0,200,150,0.8)'],
-      borderColor: ['rgb(239,68,68)', 'rgb(0,200,150)'],
+      data: [gastos || 0, investimentos || 0, receitas || 0],
+      backgroundColor: ['rgba(239,68,68,0.8)', 'rgba(0,200,150,0.8)', 'rgba(99,102,241,0.8)'],
+      borderColor: ['rgb(239,68,68)', 'rgb(0,200,150)', 'rgb(99,102,241)'],
       borderWidth: 2,
       hoverOffset: 8,
     }],
-  }
+  }), [gastos, investimentos, receitas])
 
-  const options = {
+  const options = useMemo(() => ({
     cutout: '72%',
     layout: { padding: 12 },
     plugins: {
@@ -31,7 +32,7 @@ export default function FluxoChart({ gastos, investimentos, typeFilter, monthFil
         },
       },
     },
-  }
+  }), [total])
 
   return (
     <div className="card" style={{ padding: 24, overflow: 'visible' }}>
@@ -41,6 +42,7 @@ export default function FluxoChart({ gastos, investimentos, typeFilter, monthFil
           <option value="todos">Todos os tipos</option>
           <option value="gasto">Gastos</option>
           <option value="investimento">Investimentos</option>
+          <option value="receita">Receitas</option>
         </select>
         <select value={monthFilter} onChange={e => onMonthChange(e.target.value)} style={{ flex: 1, minWidth: 130 }}>
           <option value="">Todos os meses</option>
@@ -68,7 +70,7 @@ export default function FluxoChart({ gastos, investimentos, typeFilter, monthFil
           </div>
 
           {/* Legenda abaixo */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginTop: 16, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 16, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgb(239,68,68)', flexShrink: 0 }} />
               <div>
@@ -81,6 +83,13 @@ export default function FluxoChart({ gastos, investimentos, typeFilter, monthFil
               <div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Investimentos {total > 0 ? `· ${Math.round(investimentos / total * 100)}%` : ''}</div>
                 <div style={{ fontSize: '0.88rem', fontWeight: 400, color: 'var(--accent)' }}>{fmtCurrency(investimentos)}</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgb(99,102,241)', flexShrink: 0 }} />
+              <div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Receitas {total > 0 ? `· ${Math.round(receitas / total * 100)}%` : ''}</div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 400, color: 'rgb(99,102,241)' }}>{fmtCurrency(receitas)}</div>
               </div>
             </div>
           </div>

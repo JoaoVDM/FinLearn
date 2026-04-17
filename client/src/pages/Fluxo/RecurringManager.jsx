@@ -7,7 +7,7 @@ import ConfirmDialog from '../../components/ConfirmDialog.jsx'
 
 const EMPTY_FORM = { type: 'gasto', description: '', value: '', category: '' }
 
-const TYPE_LABELS = { gasto: 'Gasto', investimento: 'Investimento' }
+const TYPE_LABELS = { gasto: 'Gasto', investimento: 'Investimento', receita: 'Receita' }
 
 export default function RecurringManager({ onGenerate }) {
   const [templates, setTemplates] = useState([])
@@ -106,6 +106,7 @@ export default function RecurringManager({ onGenerate }) {
           <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value, category: '' }))}>
             <option value="gasto">Gasto</option>
             <option value="investimento">Investimento</option>
+            <option value="receita">Receita</option>
           </select>
           <input
             type="text"

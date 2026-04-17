@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
 import { getProgress, postProgress, resetProgress as apiReset } from '../services/api.js'
 
 const ProgressContext = createContext()
@@ -19,18 +19,23 @@ export function ProgressProvider({ children }) {
 
   useEffect(() => { refresh() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const markLesson = async (lessonId, completed) => {
+  const markLesson = useCallback(async (lessonId, completed) => {
     await postProgress(lessonId, completed)
     await refresh()
-  }
+  }, [refresh])
 
-  const reset = async () => {
+  const reset = useCallback(async () => {
     await apiReset()
     await refresh()
-  }
+  }, [refresh])
+
+  const contextValue = useMemo(
+    () => ({ progress, error, refreshProgress: refresh, markLesson, resetProgress: reset }),
+    [progress, error, refresh, markLesson, reset]
+  )
 
   return (
-    <ProgressContext.Provider value={{ progress, error, refreshProgress: refresh, markLesson, resetProgress: reset }}>
+    <ProgressContext.Provider value={contextValue}>
       {children}
     </ProgressContext.Provider>
   )

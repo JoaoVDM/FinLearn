@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { CreditCard, TrendingUp, Plus, Loader } from 'lucide-react'
+import { CreditCard, TrendingUp, Wallet, Plus, Loader } from 'lucide-react'
 import { postFluxo } from '../../services/api.js'
 import { showToast } from '../../components/Toast.jsx'
 
 const CATEGORIES = {
   gasto: ['Alimentação', 'Transporte', 'Moradia', 'Saúde', 'Educação', 'Lazer', 'Vestuário', 'Assinaturas', 'Outros'],
   investimento: ['Renda Fixa', 'Ações', 'FIIs', 'Tesouro Direto', 'Cripto', 'Previdência', 'Outros'],
+  receita: ['Salário', 'Freelance', 'Dividendos', 'Aluguel', 'Bônus', 'Outros'],
 }
 
 export default function TransactionForm({ onAdd }) {
@@ -56,6 +57,13 @@ export default function TransactionForm({ onAdd }) {
           onClick={() => handleTypeChange('investimento')}
         >
           <TrendingUp size={14} /> Investimento
+        </button>
+        <button
+          type="button"
+          className={`btn btn-sm ${form.type === 'receita' ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => handleTypeChange('receita')}
+        >
+          <Wallet size={14} /> Receita
         </button>
       </div>
       <div className="form-group">

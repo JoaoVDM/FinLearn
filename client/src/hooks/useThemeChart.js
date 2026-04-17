@@ -1,8 +1,9 @@
+import { useMemo } from 'react'
 import { useTheme } from '../context/ThemeContext.jsx'
 
 export function useThemeChart() {
   const { theme } = useTheme()
-  return {
+  return useMemo(() => ({
     tickColor:    theme === 'dark' ? 'rgba(232,240,254,0.55)' : '#64748b',
     gridColor:    theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)',
     legendColor:  theme === 'dark' ? 'rgba(232,240,254,0.75)' : '#334155',
@@ -13,5 +14,5 @@ export function useThemeChart() {
     accentLight:  'rgba(0,200,150,0.12)',
     secondaryColor: '#6366f1',
     secondaryLight: 'rgba(99,102,241,0.12)',
-  }
+  }), [theme])
 }
