@@ -7,10 +7,10 @@ export default function MobileHeader({ onMenuClick, onSearchClick }) {
         <Menu size={20} />
       </button>
       <div className="mobile-logo">
-        <div className="logo-icon-wrap" style={{ width: 26, height: 26, borderRadius: 7 }}>
-          <TrendingUp size={14} color="var(--accent)" strokeWidth={2.5} />
+        <div className="logo-icon-wrap" style={{ width: 28, height: 28, borderRadius: 7 }}>
+          <TrendingUp size={15} color="var(--accent)" strokeWidth={2.5} />
         </div>
-        <span>FinLearn</span>
+        <span className="logo-name">FinLearn</span>
       </div>
       <button className="hamburger" onClick={onSearchClick} aria-label="Pesquisar">
         <Search size={18} />

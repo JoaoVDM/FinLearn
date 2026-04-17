@@ -42,9 +42,12 @@ export default function Sidebar({ isOpen, onClose }) {
     <aside className={`sidebar${isOpen ? ' open' : ''}`}>
       <div className="sidebar-logo">
         <div className="logo-icon-wrap">
-          <TrendingUp size={16} color="var(--accent)" strokeWidth={2.5} />
+          <TrendingUp size={24} color="var(--accent)" strokeWidth={2.5} />
         </div>
-        <span className="logo-text">FinLearn</span>
+        <div className="logo-text-group">
+          <span className="logo-name">FinLearn</span>
+          <span className="logo-sub">Educação Financeira</span>
+        </div>
       </div>
 
       <nav className="sidebar-nav">
