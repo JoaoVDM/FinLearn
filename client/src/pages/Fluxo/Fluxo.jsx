@@ -1,8 +1,8 @@
 import { useEffect, useState, useMemo, useCallback } from 'react'
-import { CreditCard, TrendingUp, Wallet, Scale, Download } from 'lucide-react'
+import { CreditCard, TrendingUp, Wallet, Scale, Download, SlidersHorizontal, X } from 'lucide-react'
 import { getFluxo, deleteFluxo } from '../../services/api.js'
 import { showToast } from '../../components/Toast.jsx'
-import { fmtCurrency } from '../../utils/format.js'
+import { fmtCurrency, fmtMonth } from '../../utils/format.js'
 import TransactionForm from './TransactionForm.jsx'
 import TransactionList from './TransactionList.jsx'
 import FluxoChart from './FluxoChart.jsx'
@@ -68,7 +68,7 @@ export default function Fluxo() {
     receitas: filtered.filter(t => t.type === 'receita').reduce((s, t) => s + t.value, 0),
   }), [filtered])
 
-  const saldo = totals.receitas - totals.gastos - totals.investimentos
+  const saldo = totals.receitas - totals.gastos
 
   const handleAdd = useCallback((t) => {
     setTransactions(prev => [t, ...prev].sort((a, b) => new Date(b.date) - new Date(a.date)))
@@ -80,6 +80,9 @@ export default function Fluxo() {
     setConfirmId(null)
     showToast('Transação removida')
   }, [confirmId])
+
+  const hasActiveFilters = typeFilter !== 'todos' || monthFilter || categoryFilter
+  const clearFilters = () => { setTypeFilter('todos'); setMonthFilter(''); setCategoryFilter('') }
 
   if (loading) return <Spinner />
 
@@ -107,7 +110,7 @@ export default function Fluxo() {
         )}
       </div>
 
-      {/* Summary cards — largura total antes do grid */}
+      {/* Summary cards */}
       <div className="summary-cards">
         <div className="summary-card receitas">
           <div className="summary-card-label"><Wallet size={14} /> Receitas</div>
@@ -129,36 +132,65 @@ export default function Fluxo() {
         </div>
       </div>
 
-      {/* Grid 2 colunas */}
+      {/* Filters bar — standalone, full width */}
+      <div className="fluxo-filters-bar">
+        <SlidersHorizontal size={14} className="fluxo-filters-icon" />
+        <select className="fluxo-filter-select" value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
+          <option value="todos">Todos os tipos</option>
+          <option value="gasto">Gastos</option>
+          <option value="investimento">Investimentos</option>
+          <option value="receita">Receitas</option>
+        </select>
+        <select className="fluxo-filter-select" value={monthFilter} onChange={e => setMonthFilter(e.target.value)}>
+          <option value="">Todos os meses</option>
+          {months.map(m => <option key={m} value={m}>{fmtMonth(m)}</option>)}
+        </select>
+        {categories.length > 0 && (
+          <select className="fluxo-filter-select" value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}>
+            <option value="">Todas as categorias</option>
+            {categories.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        )}
+        {hasActiveFilters && (
+          <button className="btn btn-ghost btn-sm fluxo-filter-clear" onClick={clearFilters}>
+            <X size={13} /> Limpar
+          </button>
+        )}
+        <span className="fluxo-filter-count">
+          {filtered.length} transaç{filtered.length === 1 ? 'ão' : 'ões'}
+        </span>
+      </div>
+
+      {/* Main grid: list (primary) | tools (aside) */}
       <div className="fluxo-layout">
-        {/* Coluna esquerda: formulário + lista de transações */}
         <div className="fluxo-col-left">
-          <TransactionForm onAdd={handleAdd} />
-          <TransactionList transactions={filtered} onDelete={(id) => setConfirmId(id)} />
+          <div className="card fluxo-list-card">
+            <div className="fluxo-list-header">
+              <span className="fluxo-list-title">Transações</span>
+              {filtered.length > 0 && (
+                <span className="fluxo-list-count">{filtered.length} registro{filtered.length !== 1 ? 's' : ''}</span>
+              )}
+            </div>
+            <TransactionList transactions={filtered} onDelete={(id) => setConfirmId(id)} />
+          </div>
         </div>
 
-        {/* Coluna direita: gráficos e ferramentas */}
         <div className="fluxo-col-right">
+          <TransactionForm onAdd={handleAdd} />
           <FluxoChart
             gastos={totals.gastos}
             investimentos={totals.investimentos}
             receitas={totals.receitas}
-            typeFilter={typeFilter}
-            monthFilter={monthFilter}
-            months={months}
-            onTypeChange={setTypeFilter}
-            onMonthChange={setMonthFilter}
-            categoryFilter={categoryFilter}
-            categories={categories}
-            onCategoryChange={setCategoryFilter}
           />
-          <EvolutionChart transactions={transactions} />
-          <BudgetManager transactions={filtered} monthFilter={monthFilter} />
+          <BudgetManager transactions={transactions} activeMonthFilter={monthFilter} />
           <RecurringManager onGenerate={(newTxs) => {
             setTransactions(prev => [...newTxs, ...prev].sort((a, b) => new Date(b.date) - new Date(a.date)))
           }} />
         </div>
       </div>
+
+      {/* Evolução Mensal — full width abaixo do grid */}
+      <EvolutionChart transactions={transactions} />
     </div>
   )
 }

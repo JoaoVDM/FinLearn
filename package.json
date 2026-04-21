@@ -13,6 +13,7 @@
     "helmet": "^8.1.0"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "puppeteer": "^24.42.0"
   }
 }

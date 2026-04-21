@@ -103,12 +103,13 @@ export default function RecurringManager({ onGenerate }) {
 
       {showForm && (
         <div className="recurring-form">
-          <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value, category: '' }))}>
+          <select className="input" value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value, category: '' }))}>
             <option value="gasto">Gasto</option>
             <option value="investimento">Investimento</option>
             <option value="receita">Receita</option>
           </select>
           <input
+            className="input"
             type="text"
             placeholder="Descrição"
             value={form.description}
@@ -116,6 +117,7 @@ export default function RecurringManager({ onGenerate }) {
             onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
           />
           <input
+            className="input"
             type="number"
             placeholder="Valor (R$)"
             value={form.value}
@@ -124,6 +126,7 @@ export default function RecurringManager({ onGenerate }) {
             onChange={e => setForm(f => ({ ...f, value: e.target.value }))}
           />
           <input
+            className="input"
             type="text"
             placeholder="Categoria (opcional)"
             value={form.category}
@@ -157,14 +160,14 @@ export default function RecurringManager({ onGenerate }) {
               <div className="recurring-item-right">
                 <span className={`recurring-item-value ${t.type}`}>{fmtCurrency(t.value)}</span>
                 <span className="recurring-item-type">{TYPE_LABELS[t.type]}</span>
-                <button
-                  className="budget-icon-btn danger"
-                  title="Remover template"
-                  onClick={() => setConfirmDelete(t.id)}
-                >
-                  <Trash2 size={13} />
-                </button>
               </div>
+              <button
+                className="budget-icon-btn danger"
+                title="Remover template"
+                onClick={() => setConfirmDelete(t.id)}
+              >
+                <Trash2 size={13} />
+              </button>
             </div>
           ))}
         </div>

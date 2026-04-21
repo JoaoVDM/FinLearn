@@ -29,8 +29,6 @@ export default function EvolutionChart({ transactions }) {
     return months.map(m => ({ month: m, ...map[m] }))
   }, [transactions, period])
 
-  if (monthlyData.length === 0) return null
-
   const data = useMemo(() => ({
     labels: monthlyData.map(d => fmtMonth(d.month)),
     datasets: [
@@ -116,6 +114,8 @@ export default function EvolutionChart({ transactions }) {
     },
   }), [legendColor, tooltipBg, tooltipText, tooltipBorder, tickColor, gridColor])
 
+  if (monthlyData.length === 0) return null
+
   return (
     <div className="card evolution-chart-card">
       <div className="evolution-chart-header">
@@ -132,7 +132,9 @@ export default function EvolutionChart({ transactions }) {
           ))}
         </div>
       </div>
-      <Line data={data} options={options} />
+      <div style={{ height: 220 }}>
+        <Line data={data} options={{ ...options, maintainAspectRatio: false }} />
+      </div>
     </div>
   )
 }

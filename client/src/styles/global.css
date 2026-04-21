@@ -1864,16 +1864,17 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 /* ─── FLUXO ─────────────────────────────────────────────── */
 .transaction-form { padding: 20px; margin-bottom: 0; }
 .transaction-form-title { margin: 0 0 14px; font-size: var(--text-sm); font-weight: 600; }
-.transaction-type-group { display: flex; gap: 8px; margin-bottom: 12px; }
-.transaction-type-group .btn { flex: 1; }
+.transaction-type-group { display: flex; gap: 6px; margin-bottom: 12px; }
+.transaction-type-group .btn { flex: 1; min-width: 0; justify-content: center; }
 .transaction-row { display: flex; gap: 8px; }
 .transaction-row .input { flex: 1; }
 
+/* Layout: list (primary) on left, tools aside on right */
 .fluxo-layout {
   display: grid;
-  grid-template-columns: 360px 1fr;
+  grid-template-columns: 1fr 340px;
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .fluxo-col-left {
@@ -1883,6 +1884,11 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   min-width: 0;
 }
 
+.fluxo-col-left .fluxo-list-card {
+  flex: 1;
+  box-sizing: border-box;
+}
+
 .fluxo-col-right {
   display: flex;
   flex-direction: column;
@@ -1890,6 +1896,112 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   min-width: 0;
 }
 
+/* Filters bar — standalone full-width row above grid */
+.fluxo-filters-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 10px 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  flex-wrap: wrap;
+}
+
+.fluxo-filters-icon {
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+
+.fluxo-filter-select {
+  flex: 1;
+  min-width: 130px;
+  max-width: 200px;
+}
+
+.fluxo-filter-clear {
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+
+.fluxo-filter-count {
+  margin-left: auto;
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Transaction list card */
+.fluxo-list-card {
+  padding: 20px;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.fluxo-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.fluxo-list-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-1);
+}
+
+.fluxo-list-count {
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+
+/* Transaction list wrapper */
+.fluxo-list-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Month group */
+.fluxo-group { display: flex; flex-direction: column; gap: 0; }
+
+.fluxo-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.fluxo-group-month {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.fluxo-group-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+
+.fluxo-group-balance {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Transaction items */
 .transaction-item {
   display: flex; align-items: center; gap: 12px;
   padding: 12px 16px; margin-bottom: 6px;
@@ -1904,8 +2016,9 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   align-items: center; justify-content: center;
 }
 
-.transaction-icon.gasto        { background: var(--danger-dim); }
-.transaction-icon.investimento { background: var(--success-dim); }
+.transaction-icon.gasto        { background: var(--danger-dim); color: var(--danger); }
+.transaction-icon.investimento { background: var(--success-dim); color: var(--accent); }
+.transaction-icon.receita      { background: rgba(99,102,241,0.12); color: rgb(99,102,241); }
 .transaction-info { flex: 1; min-width: 0; }
 
 .transaction-title {
@@ -1915,9 +2028,14 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 
 .transaction-date { font-size: var(--text-xs); color: var(--text-3); margin-top: 2px; }
 
-.transaction-value { font-weight: 400; font-size: var(--text-sm); flex-shrink: 0; font-family: var(--font); }
+.transaction-value {
+  font-weight: 600; font-size: var(--text-sm);
+  flex-shrink: 0; font-family: var(--font);
+  font-variant-numeric: tabular-nums;
+}
 .transaction-value.gasto        { color: var(--danger); }
 .transaction-value.investimento { color: var(--accent); }
+.transaction-value.receita      { color: rgb(99,102,241); }
 
 .btn-delete {
   color: var(--text-3); background: none; border: none; cursor: pointer;
@@ -1927,10 +2045,11 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 
 .btn-delete:hover { color: var(--danger); background: var(--danger-dim); }
 
+/* Summary cards */
 .summary-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 10px; margin: 0 0 20px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px; margin: 0 0 16px;
 }
 
 .summary-card {
@@ -1938,13 +2057,13 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   background: var(--bg-surface);
-  border-top: 2px solid var(--border-strong);
+  border-top: 3px solid var(--border-strong);
   box-shadow: 0 1px 3px rgba(0,0,0,0.25);
   transition: transform var(--transition), box-shadow var(--transition);
 }
 
 .summary-card:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow);
 }
 
@@ -1963,9 +2082,12 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 
 .summary-card-value {
   font-size: var(--text-xl);
-  font-weight: 400;
+  font-weight: 600;
   font-family: var(--font);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .summary-card.gastos        { border-top-color: var(--danger); }
@@ -1975,6 +2097,96 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 
 .summary-card.gastos        .summary-card-value { color: var(--danger); }
 .summary-card.investimentos .summary-card-value { color: var(--accent); }
+
+/* Fluxo chart card */
+.fluxo-chart-card { padding: 20px; }
+
+.fluxo-chart-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  margin-bottom: 16px;
+}
+
+.fluxo-chart-donut-wrap {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 16px;
+}
+
+.fluxo-chart-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.fluxo-chart-center-label {
+  font-size: 0.65rem;
+  color: var(--text-3);
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.fluxo-chart-center-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.fluxo-chart-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.fluxo-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fluxo-legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.fluxo-legend-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.fluxo-legend-label {
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+
+.fluxo-legend-value {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.fluxo-chart-empty {
+  text-align: center;
+  color: var(--text-3);
+  font-size: 0.85rem;
+  padding: 20px 0;
+}
 
 .filters-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .filters-row select { flex: 1; min-width: 120px; }
@@ -2183,6 +2395,7 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 /* ─── EVOLUTION CHART ───────────────────────────────────── */
 .evolution-chart-card {
   padding: 20px;
+  margin-top: 20px;
 }
 .evolution-chart-header {
   display: flex;
@@ -2215,42 +2428,148 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 .evolution-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
 /* ─── BUDGET MANAGER ────────────────────────────────────── */
-.budget-manager-card {
-  padding: 20px;
-}
+.budget-manager-card { padding: 20px; }
+
 .budget-manager-header {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-.budget-manager-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-.budget-manager-sub {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-.budget-list { display: flex; flex-direction: column; gap: 10px; }
-.budget-item { display: flex; flex-direction: column; gap: 5px; }
-.budget-item-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  margin-bottom: 2px;
 }
+
+.bm-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-3);
+}
+
+.budget-manager-title {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+}
+
+.budget-manager-sub {
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+
+.bm-subtitle {
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  margin-bottom: 14px;
+}
+
+.budget-list { display: flex; flex-direction: column; gap: 14px; }
+
+.budget-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius);
+}
+
+.budget-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
 .budget-item-name {
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--text-secondary);
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-1);
   flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.bm-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.bm-status-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 99px;
+  letter-spacing: 0.03em;
+}
+
+/* Progress bar with percentage */
+.bm-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bm-bar-wrap .budget-bar-track { flex: 1; }
+
+.bm-bar-pct {
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  min-width: 30px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Amounts row */
+.bm-amounts {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bm-amount-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.bm-amount-right {
+  align-items: flex-end;
+}
+
+.bm-amount-label {
+  font-size: 0.66rem;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.bm-amount-value {
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-1);
+}
+
+.bm-set-limit-btn {
+  font-size: 0.72rem;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 0;
+  transition: opacity var(--transition);
+}
+
+.bm-set-limit-btn:hover { opacity: 0.75; }
+
 .budget-item-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .budget-display-row { display: flex; align-items: center; gap: 6px; }
 .budget-edit-row { display: flex; align-items: center; gap: 4px; }
@@ -2344,14 +2663,16 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   border-radius: 8px;
 }
 .recurring-item-info { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+.recurring-item-info > div { min-width: 0; }
 .recurring-type-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
-.recurring-type-dot.gasto { background: var(--danger); }
+.recurring-type-dot.gasto        { background: var(--danger); }
 .recurring-type-dot.investimento { background: var(--accent); }
+.recurring-type-dot.receita      { background: rgb(99,102,241); }
 .recurring-item-desc {
   font-size: 0.82rem;
   font-weight: 500;
@@ -2359,12 +2680,25 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  display: block;
 }
-.recurring-item-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.recurring-item-value { font-size: 0.82rem; font-weight: 600; }
-.recurring-item-value.gasto { color: var(--danger); }
+.recurring-item-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.recurring-item-value {
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.recurring-item-value.gasto        { color: var(--danger); }
 .recurring-item-value.investimento { color: var(--accent); }
-.recurring-item-type { font-size: 0.7rem; color: var(--text-muted); }
+.recurring-item-value.receita      { color: rgb(99,102,241); }
+.recurring-item-type { font-size: 0.7rem; color: var(--text-3); }
 
 /* ─── EMPTY ─────────────────────────────────────────────── */
 .empty-state { text-align: center; padding: 60px 24px; color: var(--text-3); }
@@ -2687,6 +3021,8 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   .modules-grid { grid-template-columns: 1fr; }
   .fluxo-layout { grid-template-columns: 1fr; }
   .fluxo-col-left, .fluxo-col-right { gap: 12px; }
+  .fluxo-filter-select { max-width: none; }
+  .fluxo-filter-count { margin-left: 0; }
 }
 
 @media (max-width: 768px) {
@@ -2724,7 +3060,8 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   select, textarea { font-size: 16px; }
   .hero-stats { flex-direction: column; gap: 12px; }
   .stat-item { flex-direction: row; gap: 12px; align-items: center; }
-  .summary-cards { grid-template-columns: 1fr; gap: 8px; }
+  .summary-cards { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .summary-card-value { font-size: var(--text-lg); }
   .sim-stats-grid { grid-template-columns: 1fr; }
   .button-group { flex-direction: column; }
   .button-group > * { width: 100%; justify-content: center; }
