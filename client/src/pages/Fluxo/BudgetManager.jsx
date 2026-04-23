@@ -25,12 +25,11 @@ function BudgetBar({ spent, limit }) {
   )
 }
 
-const CURRENT_MONTH = new Date().toISOString().slice(0, 7)
-
 export default function BudgetManager({ transactions, activeMonthFilter }) {
   const [budgets, setBudgets] = useState({})
   const [editing, setEditing] = useState(null)
   const [editVal, setEditVal] = useState('')
+  const CURRENT_MONTH = new Date().toISOString().slice(0, 7)
 
   useEffect(() => {
     getBudgets().then(data => setBudgets(data && typeof data === 'object' && !data.error ? data : {}))

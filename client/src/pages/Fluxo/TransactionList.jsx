@@ -1,4 +1,4 @@
-import { TrendingUp, CreditCard, Wallet, Trash2, SearchX } from 'lucide-react'
+import { TrendingUp, CreditCard, Wallet, Trash2, Pencil, SearchX } from 'lucide-react'
 import { fmtCurrency, fmtDate, fmtMonth } from '../../utils/format.js'
 
 const TYPE_ICON = {
@@ -7,7 +7,7 @@ const TYPE_ICON = {
   receita: <Wallet size={15} />,
 }
 
-export default function TransactionList({ transactions, onDelete }) {
+export default function TransactionList({ transactions, editId, onEdit, onDelete }) {
   if (transactions.length === 0) {
     return (
       <div className="empty-state-box">
@@ -18,7 +18,6 @@ export default function TransactionList({ transactions, onDelete }) {
     )
   }
 
-  // Group by month (YYYY-MM) — correct grouping via Map
   const groupMap = new Map()
   for (const t of transactions) {
     const key = t.date?.slice(0, 7) || ''
@@ -51,7 +50,7 @@ export default function TransactionList({ transactions, onDelete }) {
             </div>
 
             {items.map(t => (
-              <div key={t.id} className="card transaction-item">
+              <div key={t.id} className={`card transaction-item${editId === t.id ? ' editing' : ''}`}>
                 <span className={`transaction-icon ${t.type}`}>
                   {TYPE_ICON[t.type]}
                 </span>
@@ -65,7 +64,20 @@ export default function TransactionList({ transactions, onDelete }) {
                 <span className={`transaction-value ${t.type}`}>
                   {t.type === 'gasto' ? '−' : '+'}{fmtCurrency(t.value)}
                 </span>
-                <button className="btn-delete" onClick={() => onDelete(t.id)} title="Remover" aria-label="Remover">
+                <button
+                  className={`btn-icon-action${editId === t.id ? ' active' : ''}`}
+                  onClick={() => onEdit(t.id)}
+                  title={editId === t.id ? 'Cancelar edição' : 'Editar'}
+                  aria-label={`Editar ${t.description}`}
+                >
+                  <Pencil size={14} />
+                </button>
+                <button
+                  className="btn-delete"
+                  onClick={() => onDelete(t.id)}
+                  title="Remover"
+                  aria-label={`Remover ${t.description}`}
+                >
                   <Trash2 size={15} />
                 </button>
               </div>

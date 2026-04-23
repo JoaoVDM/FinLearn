@@ -37,6 +37,7 @@ function NotaCard({ nota, onDelete, onSave }) {
         </div>
         <div className="nota-card-actions">
           {saved && <span className="nota-saved-indicator">Salvo ✓</span>}
+          <span className="nota-char-count">{text.length}/2000</span>
           <button
             className="btn-delete"
             onClick={() => onDelete(nota.lessonId)}
@@ -51,6 +52,7 @@ function NotaCard({ nota, onDelete, onSave }) {
         className="nota-card-textarea"
         value={text}
         onChange={handleChange}
+        maxLength={2000}
         rows={4}
         placeholder="Anotação vazia..."
       />

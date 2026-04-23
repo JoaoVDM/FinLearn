@@ -105,12 +105,14 @@ export default function Licao() {
             <NotebookPen size={15} />
             <span>Minhas anotações</span>
             {notaSaved && <span className="lesson-note-saved">Salvo ✓</span>}
+            <span className="nota-char-count">{nota.length}/2000</span>
           </div>
           <textarea
             className="lesson-note-textarea"
             placeholder="Escreva suas anotações sobre esta lição..."
             value={nota}
             onChange={handleNotaChange}
+            maxLength={2000}
             rows={4}
           />
         </div>

@@ -5,7 +5,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
-const PORT = 3004;
+const PORT = process.env.PORT || 3004;
 
 const DATA_FILE = path.join(__dirname, 'data.json');
 const CONTENT_FILE = path.join(__dirname, 'content.json');
@@ -57,12 +57,13 @@ function readData() {
     if (!raw.budgets || typeof raw.budgets !== 'object') raw.budgets = {};
     if (!Array.isArray(raw.recurring)) raw.recurring = [];
     if (!Array.isArray(raw.recurringGenerated)) raw.recurringGenerated = [];
+    if (!Array.isArray(raw.goals)) raw.goals = [];
     _dataCache = raw;
     return raw;
   } catch {
     const fresh = {
       completedLessons: [], quizScores: {}, transactions: [],
-      notes: {}, budgets: {}, recurring: [], recurringGenerated: []
+      notes: {}, budgets: {}, recurring: [], recurringGenerated: [], goals: []
     };
     _dataCache = fresh;
     return fresh;
@@ -108,7 +109,8 @@ app.get('/api/progresso', (req, res) => {
       id: m.id, title: m.title, icon: m.icon, description: m.description,
       total, completed,
       percent: total > 0 ? Math.round((completed / total) * 100) : 0,
-      quizScore
+      quizScore,
+      lessons: m.lessons.map(l => ({ id: l.id, title: l.title }))
     };
   });
 
@@ -119,6 +121,7 @@ app.get('/api/progresso', (req, res) => {
 app.post('/api/progresso', wrap(async (req, res) => {
   const { lessonId, completed } = req.body;
   if (!lessonId) return res.status(400).json({ error: 'lessonId required' });
+  if (!validLessonIds.has(lessonId)) return res.status(400).json({ error: 'lessonId inválido' });
 
   const data = readData();
   if (completed && !data.completedLessons.includes(lessonId)) {
@@ -133,7 +136,7 @@ app.post('/api/progresso', wrap(async (req, res) => {
 // POST /api/progresso/reset
 app.post('/api/progresso/reset', wrap(async (req, res) => {
   const data = readData();
-  // Preserva budgets e recorrentes — reseta apenas progresso de aprendizado e transações
+  // Preserva budgets, recorrentes e metas — reseta apenas progresso de aprendizado e transações
   await writeData({
     completedLessons: [],
     quizScores: {},
@@ -141,7 +144,8 @@ app.post('/api/progresso/reset', wrap(async (req, res) => {
     notes: {},
     budgets: data.budgets || {},
     recurring: data.recurring || [],
-    recurringGenerated: data.recurringGenerated || []
+    recurringGenerated: data.recurringGenerated || [],
+    goals: data.goals || []
   });
   res.json({ success: true });
 }));
@@ -267,12 +271,16 @@ app.post('/api/fluxo', wrap(async (req, res) => {
     return res.status(400).json({ error: 'value deve ser um número positivo' });
   }
   const data = readData();
+  const dateStr = date || new Date().toISOString().split('T')[0];
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    return res.status(400).json({ error: 'date deve estar no formato YYYY-MM-DD' });
+  }
   const transaction = {
     id: Date.now().toString(),
     type,
     description: String(description).trim().slice(0, 80),
     value: parsedValue,
-    date: date || new Date().toISOString().split('T')[0],
+    date: dateStr,
     category: category ? String(category).trim().slice(0, 40) : ''
   };
   data.transactions.push(transaction);
@@ -280,11 +288,46 @@ app.post('/api/fluxo', wrap(async (req, res) => {
   res.json({ success: true, transaction });
 }));
 
+// PUT /api/fluxo/:id
+app.put('/api/fluxo/:id', wrap(async (req, res) => {
+  const { id } = req.params;
+  const { type, description, value, date, category } = req.body;
+  if (!type || !description || value === undefined) {
+    return res.status(400).json({ error: 'type, description e value são obrigatórios' });
+  }
+  if (!VALID_TYPES.has(type)) {
+    return res.status(400).json({ error: `type inválido. Use: ${[...VALID_TYPES].join(', ')}` });
+  }
+  const parsedValue = parseFloat(value);
+  if (isNaN(parsedValue) || parsedValue <= 0) {
+    return res.status(400).json({ error: 'value deve ser um número positivo' });
+  }
+  const dateStr = date || new Date().toISOString().split('T')[0];
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    return res.status(400).json({ error: 'date deve estar no formato YYYY-MM-DD' });
+  }
+  const data = readData();
+  const idx = data.transactions.findIndex(t => t.id === id);
+  if (idx === -1) return res.status(404).json({ error: 'Transação não encontrada' });
+  data.transactions[idx] = {
+    ...data.transactions[idx],
+    type,
+    description: String(description).trim().slice(0, 80),
+    value: parsedValue,
+    date: dateStr,
+    category: category ? String(category).trim().slice(0, 40) : ''
+  };
+  await writeData(data);
+  res.json({ success: true, transaction: data.transactions[idx] });
+}));
+
 // DELETE /api/fluxo/:id
 app.delete('/api/fluxo/:id', wrap(async (req, res) => {
   const { id } = req.params;
   const data = readData();
+  const before = data.transactions.length;
   data.transactions = data.transactions.filter(t => t.id !== id);
+  if (data.transactions.length === before) return res.status(404).json({ error: 'Transação não encontrada' });
   await writeData(data);
   res.json({ success: true });
 }));
@@ -373,7 +416,9 @@ app.post('/api/recurring', wrap(async (req, res) => {
 app.delete('/api/recurring/:id', wrap(async (req, res) => {
   const { id } = req.params;
   const data = readData();
+  const before = data.recurring.length;
   data.recurring = data.recurring.filter(r => r.id !== id);
+  if (data.recurring.length === before) return res.status(404).json({ error: 'Template não encontrado' });
   await writeData(data);
   res.json({ success: true });
 }));
@@ -412,6 +457,73 @@ app.post('/api/recurring/generate/:month', wrap(async (req, res) => {
   res.json({ success: true, count: generated.length, transactions: generated });
 }));
 
+// ── METAS ─────────────────────────────────────────────────────────────────────
+
+// GET /api/goals
+app.get('/api/goals', (req, res) => {
+  const data = readData();
+  res.json(data.goals || []);
+});
+
+// POST /api/goals
+app.post('/api/goals', wrap(async (req, res) => {
+  const { name, goal, initial, rate, months, skipPerYear, currentSaved, rateMode } = req.body;
+  if (!name || goal === undefined) return res.status(400).json({ error: 'name e goal são obrigatórios' });
+  const parsedGoal = parseFloat(goal);
+  if (isNaN(parsedGoal) || parsedGoal <= 0) return res.status(400).json({ error: 'goal deve ser positivo' });
+  const data = readData();
+  const newGoal = {
+    id: Date.now().toString(),
+    name: String(name).trim().slice(0, 60),
+    goal: parsedGoal,
+    initial: parseFloat(initial) || 0,
+    rate: parseFloat(rate) || 0,
+    months: Math.max(1, parseInt(months) || 12),
+    skipPerYear: Math.min(11, Math.max(0, parseInt(skipPerYear) || 0)),
+    currentSaved: parseFloat(currentSaved) || 0,
+    rateMode: rateMode === 'year' ? 'year' : 'month',
+    createdAt: new Date().toISOString()
+  };
+  data.goals.push(newGoal);
+  await writeData(data);
+  res.json({ success: true, goal: newGoal });
+}));
+
+// PUT /api/goals/:id
+app.put('/api/goals/:id', wrap(async (req, res) => {
+  const { id } = req.params;
+  const { name, goal, initial, rate, months, skipPerYear, currentSaved, rateMode } = req.body;
+  const data = readData();
+  const idx = data.goals.findIndex(g => g.id === id);
+  if (idx === -1) return res.status(404).json({ error: 'Meta não encontrada' });
+  const parsedGoal = parseFloat(goal);
+  if (isNaN(parsedGoal) || parsedGoal <= 0) return res.status(400).json({ error: 'goal deve ser positivo' });
+  data.goals[idx] = {
+    ...data.goals[idx],
+    name: String(name || data.goals[idx].name).trim().slice(0, 60),
+    goal: parsedGoal,
+    initial: parseFloat(initial) || 0,
+    rate: parseFloat(rate) || 0,
+    months: Math.max(1, parseInt(months) || 12),
+    skipPerYear: Math.min(11, Math.max(0, parseInt(skipPerYear) || 0)),
+    currentSaved: parseFloat(currentSaved) || 0,
+    rateMode: rateMode === 'year' ? 'year' : 'month',
+  };
+  await writeData(data);
+  res.json({ success: true, goal: data.goals[idx] });
+}));
+
+// DELETE /api/goals/:id
+app.delete('/api/goals/:id', wrap(async (req, res) => {
+  const { id } = req.params;
+  const data = readData();
+  const before = data.goals.length;
+  data.goals = data.goals.filter(g => g.id !== id);
+  if (data.goals.length === before) return res.status(404).json({ error: 'Meta não encontrada' });
+  await writeData(data);
+  res.json({ success: true });
+}));
+
 // ── PESQUISA GLOBAL ───────────────────────────────────────────────────────────
 
 // GET /api/search?q=termo
@@ -422,10 +534,10 @@ app.get('/api/search', (req, res) => {
   const results = [];
   const data = readData();
 
-  // Pesquisar lições
+  // Pesquisar lições (título + conteúdo)
   content.modules.forEach(m => {
     m.lessons.forEach(l => {
-      const haystack = `${l.title} ${l.id}`.toLowerCase();
+      const haystack = `${l.title} ${l.id} ${l.content || ''}`.toLowerCase();
       if (haystack.includes(q)) {
         results.push({ type: 'lesson', id: l.id, title: l.title, moduleId: m.id, moduleTitle: m.title });
       }

@@ -17,7 +17,7 @@ function exportCSV(transactions) {
   const rows = transactions.map(t =>
     `${t.date},${t.type},${t.category || ''},"${(t.description || '').replace(/"/g, '""')}",${t.value}`
   )
-  const csv = '\uFEFF' + [header, ...rows].join('\n')
+  const csv = '﻿' + [header, ...rows].join('\n')
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -36,6 +36,7 @@ export default function Fluxo() {
   const [monthFilter, setMonthFilter] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
   const [confirmId, setConfirmId] = useState(null)
+  const [editId, setEditId] = useState(null)
 
   useEffect(() => {
     getFluxo().then(data => {
@@ -70,16 +71,32 @@ export default function Fluxo() {
 
   const saldo = totals.receitas - totals.gastos
 
+  const editTransaction = useMemo(
+    () => editId ? transactions.find(t => t.id === editId) || null : null,
+    [editId, transactions]
+  )
+
   const handleAdd = useCallback((t) => {
     setTransactions(prev => [t, ...prev].sort((a, b) => new Date(b.date) - new Date(a.date)))
   }, [])
 
+  const handleUpdate = useCallback((updated) => {
+    setTransactions(prev =>
+      prev.map(t => t.id === updated.id ? updated : t)
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+    )
+    setEditId(null)
+    showToast('Transação atualizada')
+  }, [])
+
   const handleDelete = useCallback(async () => {
-    await deleteFluxo(confirmId)
+    const res = await deleteFluxo(confirmId)
+    if (res.error) { showToast(res.message || 'Erro ao remover transação', 'error'); setConfirmId(null); return }
     setTransactions(prev => prev.filter(t => t.id !== confirmId))
+    if (editId === confirmId) setEditId(null)
     setConfirmId(null)
     showToast('Transação removida')
-  }, [confirmId])
+  }, [confirmId, editId])
 
   const hasActiveFilters = typeFilter !== 'todos' || monthFilter || categoryFilter
   const clearFilters = () => { setTypeFilter('todos'); setMonthFilter(''); setCategoryFilter('') }
@@ -114,7 +131,7 @@ export default function Fluxo() {
       <div className="summary-cards">
         <div className="summary-card receitas">
           <div className="summary-card-label"><Wallet size={14} /> Receitas</div>
-          <div className="summary-card-value" style={{ color: 'rgb(99,102,241)' }}>{fmtCurrency(totals.receitas)}</div>
+          <div className="summary-card-value" style={{ color: 'var(--color-receita)' }}>{fmtCurrency(totals.receitas)}</div>
         </div>
         <div className="summary-card gastos">
           <div className="summary-card-label"><CreditCard size={14} /> Gastos</div>
@@ -132,7 +149,7 @@ export default function Fluxo() {
         </div>
       </div>
 
-      {/* Filters bar — standalone, full width */}
+      {/* Filters bar */}
       <div className="fluxo-filters-bar">
         <SlidersHorizontal size={14} className="fluxo-filters-icon" />
         <select className="fluxo-filter-select" value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
@@ -161,7 +178,7 @@ export default function Fluxo() {
         </span>
       </div>
 
-      {/* Main grid: list (primary) | tools (aside) */}
+      {/* Main grid */}
       <div className="fluxo-layout">
         <div className="fluxo-col-left">
           <div className="card fluxo-list-card">
@@ -171,12 +188,22 @@ export default function Fluxo() {
                 <span className="fluxo-list-count">{filtered.length} registro{filtered.length !== 1 ? 's' : ''}</span>
               )}
             </div>
-            <TransactionList transactions={filtered} onDelete={(id) => setConfirmId(id)} />
+            <TransactionList
+              transactions={filtered}
+              editId={editId}
+              onEdit={(id) => setEditId(prev => prev === id ? null : id)}
+              onDelete={(id) => setConfirmId(id)}
+            />
           </div>
         </div>
 
         <div className="fluxo-col-right">
-          <TransactionForm onAdd={handleAdd} />
+          <TransactionForm
+            onAdd={handleAdd}
+            editTransaction={editTransaction}
+            onUpdate={handleUpdate}
+            onCancelEdit={() => setEditId(null)}
+          />
           <FluxoChart
             gastos={totals.gastos}
             investimentos={totals.investimentos}
@@ -189,7 +216,6 @@ export default function Fluxo() {
         </div>
       </div>
 
-      {/* Evolução Mensal — full width abaixo do grid */}
       <EvolutionChart transactions={transactions} />
     </div>
   )

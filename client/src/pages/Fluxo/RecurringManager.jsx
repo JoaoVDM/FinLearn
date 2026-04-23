@@ -3,6 +3,7 @@ import { Plus, Trash2, RefreshCw, Check, X } from 'lucide-react'
 import { getRecurring, addRecurring, deleteRecurring, generateRecurring } from '../../services/api.js'
 import { fmtCurrency, fmtMonth } from '../../utils/format.js'
 import { showToast } from '../../components/Toast.jsx'
+import { CATEGORIES } from '../../utils/categories.js'
 import ConfirmDialog from '../../components/ConfirmDialog.jsx'
 
 const EMPTY_FORM = { type: 'gasto', description: '', value: '', category: '' }
@@ -44,7 +45,8 @@ export default function RecurringManager({ onGenerate }) {
   }, [form])
 
   const handleDelete = useCallback(async () => {
-    await deleteRecurring(confirmDelete)
+    const res = await deleteRecurring(confirmDelete)
+    if (res.error) { showToast(res.message || 'Erro ao remover recorrente', 'error'); setConfirmDelete(null); return }
     setTemplates(prev => prev.filter(t => t.id !== confirmDelete))
     setConfirmDelete(null)
     showToast('Recorrente removido')
@@ -127,12 +129,16 @@ export default function RecurringManager({ onGenerate }) {
           />
           <input
             className="input"
+            list="recurring-cat-list"
             type="text"
             placeholder="Categoria (opcional)"
             value={form.category}
             maxLength={40}
             onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
           />
+          <datalist id="recurring-cat-list">
+            {(CATEGORIES[form.type] || []).map(c => <option key={c} value={c} />)}
+          </datalist>
           <div style={{ display: 'flex', gap: 8 }}>
             <button className="btn btn-primary btn-sm" style={{ flex: 1 }} onClick={handleAdd}>
               <Check size={14} /> Salvar

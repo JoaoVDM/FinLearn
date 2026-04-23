@@ -1,40 +1,76 @@
-import { useState } from 'react'
-import { CreditCard, TrendingUp, Wallet, Plus, Loader } from 'lucide-react'
-import { postFluxo } from '../../services/api.js'
+import { useState, useEffect } from 'react'
+import { CreditCard, TrendingUp, Wallet, Plus, Loader, Pencil, X } from 'lucide-react'
+import { postFluxo, editFluxo } from '../../services/api.js'
 import { showToast } from '../../components/Toast.jsx'
+import { CATEGORIES } from '../../utils/categories.js'
 
-const CATEGORIES = {
-  gasto: ['Alimentação', 'Transporte', 'Moradia', 'Saúde', 'Educação', 'Lazer', 'Vestuário', 'Assinaturas', 'Outros'],
-  investimento: ['Renda Fixa', 'Ações', 'FIIs', 'Tesouro Direto', 'Cripto', 'Previdência', 'Outros'],
-  receita: ['Salário', 'Freelance', 'Dividendos', 'Aluguel', 'Bônus', 'Outros'],
-}
+const EMPTY = { type: 'gasto', description: '', value: '', date: new Date().toISOString().slice(0, 10), category: '' }
 
-export default function TransactionForm({ onAdd }) {
-  const [form, setForm] = useState({ type: 'gasto', description: '', value: '', date: new Date().toISOString().slice(0, 10), category: '' })
+export default function TransactionForm({ onAdd, editTransaction, onUpdate, onCancelEdit }) {
+  const [form, setForm] = useState(EMPTY)
   const [saving, setSaving] = useState(false)
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+  const [errors, setErrors] = useState({})
+
+  const isEditing = !!editTransaction
+
+  useEffect(() => {
+    if (editTransaction) {
+      setForm({
+        type: editTransaction.type,
+        description: editTransaction.description,
+        value: String(editTransaction.value),
+        date: editTransaction.date,
+        category: editTransaction.category || ''
+      })
+      setErrors({})
+    } else {
+      setForm(EMPTY)
+      setErrors({})
+    }
+  }, [editTransaction])
+
+  const set = (k, v) => {
+    setForm(f => ({ ...f, [k]: v }))
+    if (errors[k]) setErrors(e => ({ ...e, [k]: null }))
+  }
 
   const handleTypeChange = (type) => {
-    set('type', type)
-    set('category', '')
+    setForm(f => ({ ...f, type, category: '' }))
+    if (errors.type) setErrors(e => ({ ...e, type: null }))
+  }
+
+  const validate = () => {
+    const e = {}
+    if (!form.description.trim()) e.description = 'Descrição obrigatória'
+    const v = parseFloat(form.value)
+    if (!form.value || isNaN(v) || v <= 0) e.value = 'Informe um valor positivo'
+    if (!form.date) e.date = 'Data obrigatória'
+    setErrors(e)
+    return Object.keys(e).length === 0
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!validate()) return
     const parsedValue = parseFloat(form.value)
-    if (!form.description.trim() || isNaN(parsedValue) || parsedValue <= 0 || !form.date) return
     setSaving(true)
-    const result = await postFluxo(form.type, form.description, parsedValue, form.date, form.category)
-    setSaving(false)
-    if (result.error) {
-      showToast(result.message || 'Erro ao salvar transação', 'error')
-      return
-    }
-    const transaction = result.transaction || (result.id ? result : null)
-    if (transaction) {
-      onAdd(transaction)
-      setForm(f => ({ ...f, description: '', value: '', category: '' }))
-      showToast('Transação adicionada')
+
+    if (isEditing) {
+      const result = await editFluxo(editTransaction.id, form.type, form.description, parsedValue, form.date, form.category)
+      setSaving(false)
+      if (result.error) { showToast(result.message || 'Erro ao atualizar transação', 'error'); return }
+      onUpdate(result.transaction || { ...editTransaction, ...form, value: parsedValue })
+    } else {
+      const result = await postFluxo(form.type, form.description, parsedValue, form.date, form.category)
+      setSaving(false)
+      if (result.error) { showToast(result.message || 'Erro ao salvar transação', 'error'); return }
+      const transaction = result.transaction || (result.id ? result : null)
+      if (transaction) {
+        onAdd(transaction)
+        setForm(f => ({ ...f, description: '', value: '', category: '' }))
+        setErrors({})
+        showToast('Transação adicionada')
+      }
     }
   }
 
@@ -42,33 +78,45 @@ export default function TransactionForm({ onAdd }) {
 
   return (
     <form className="card transaction-form" onSubmit={handleSubmit}>
-      <h3 className="transaction-form-title">Nova Transação</h3>
+      <div className="transaction-form-header">
+        <h3 className="transaction-form-title">
+          {isEditing ? <><Pencil size={14} /> Editar Transação</> : 'Nova Transação'}
+        </h3>
+        {isEditing && (
+          <button type="button" className="btn-delete" onClick={onCancelEdit} aria-label="Cancelar edição">
+            <X size={15} />
+          </button>
+        )}
+      </div>
+
       <div className="transaction-type-group">
-        <button
-          type="button"
-          className={`btn btn-sm ${form.type === 'gasto' ? 'btn-primary' : 'btn-secondary'}`}
-          onClick={() => handleTypeChange('gasto')}
-        >
-          <CreditCard size={14} /> Gasto
-        </button>
-        <button
-          type="button"
-          className={`btn btn-sm ${form.type === 'investimento' ? 'btn-primary' : 'btn-secondary'}`}
-          onClick={() => handleTypeChange('investimento')}
-        >
-          <TrendingUp size={14} /> Investimento
-        </button>
-        <button
-          type="button"
-          className={`btn btn-sm ${form.type === 'receita' ? 'btn-primary' : 'btn-secondary'}`}
-          onClick={() => handleTypeChange('receita')}
-        >
-          <Wallet size={14} /> Receita
-        </button>
+        {[
+          { val: 'gasto', Icon: CreditCard, label: 'Gasto' },
+          { val: 'investimento', Icon: TrendingUp, label: 'Investimento' },
+          { val: 'receita', Icon: Wallet, label: 'Receita' },
+        ].map(({ val, Icon, label }) => (
+          <button
+            key={val}
+            type="button"
+            className={`btn btn-sm ${form.type === val ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => handleTypeChange(val)}
+          >
+            <Icon size={14} /> {label}
+          </button>
+        ))}
       </div>
+
       <div className="form-group">
-        <input className="input" placeholder="Descrição" value={form.description} onChange={e => set('description', e.target.value)} required aria-label="Descrição" />
+        <input
+          className={`input${errors.description ? ' input-error' : ''}`}
+          placeholder="Descrição"
+          value={form.description}
+          onChange={e => set('description', e.target.value)}
+          aria-label="Descrição"
+        />
+        {errors.description && <span className="field-error">{errors.description}</span>}
       </div>
+
       <div className="form-group">
         <input
           className="input"
@@ -82,13 +130,48 @@ export default function TransactionForm({ onAdd }) {
           {CATEGORIES[form.type].map(c => <option key={c} value={c} />)}
         </datalist>
       </div>
+
       <div className="transaction-row">
-        <input className="input" type="number" placeholder="Valor (R$)" step="0.01" min="0.01" value={form.value} onChange={e => set('value', e.target.value)} required aria-label="Valor" />
-        <input className="input" type="date" value={form.date} onChange={e => set('date', e.target.value)} aria-label="Data" />
+        <div style={{ flex: 1 }}>
+          <input
+            className={`input${errors.value ? ' input-error' : ''}`}
+            type="number"
+            placeholder="Valor (R$)"
+            step="0.01"
+            min="0.01"
+            value={form.value}
+            onChange={e => set('value', e.target.value)}
+            aria-label="Valor"
+          />
+          {errors.value && <span className="field-error">{errors.value}</span>}
+        </div>
+        <div style={{ flex: 1 }}>
+          <input
+            className={`input${errors.date ? ' input-error' : ''}`}
+            type="date"
+            value={form.date}
+            onChange={e => set('date', e.target.value)}
+            aria-label="Data"
+          />
+          {errors.date && <span className="field-error">{errors.date}</span>}
+        </div>
       </div>
-      <button className="btn btn-primary w-full" style={{ marginTop: 12 }} disabled={saving}>
-        {saving ? <><Loader size={14} style={{ animation: 'spin 0.8s linear infinite' }} /> Salvando...</> : <><Plus size={14} /> Adicionar</>}
-      </button>
+
+      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+        <button className="btn btn-primary w-full" disabled={saving}>
+          {saving
+            ? <><Loader size={14} style={{ animation: 'spin 0.8s linear infinite' }} /> Salvando...</>
+            : isEditing
+              ? <><Pencil size={14} /> Salvar alterações</>
+              : <><Plus size={14} /> Adicionar</>
+          }
+        </button>
+        {isEditing && (
+          <button type="button" className="btn btn-secondary" onClick={onCancelEdit} style={{ flexShrink: 0 }}>
+            Cancelar
+          </button>
+        )}
+      </div>
     </form>
   )
 }

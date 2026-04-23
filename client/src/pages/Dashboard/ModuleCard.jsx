@@ -4,10 +4,11 @@ import ProgressBar from '../../components/ProgressBar.jsx'
 import Badge from '../../components/Badge.jsx'
 import ModuleIcon from '../../utils/moduleIcons.jsx'
 
-export default function ModuleCard({ module, moduleProgress, quizScore, completedLessons }) {
-  const percent  = moduleProgress?.percent || 0
-  const completed = moduleProgress?.completed || 0
-  const total    = moduleProgress?.total || module.lessons?.length || 0
+export default function ModuleCard({ module, completedLessons }) {
+  const percent    = module.percent || 0
+  const completed  = module.completed || 0
+  const total      = module.total || 0
+  const quizScore  = module.quizScore
 
   const firstIncomplete = module.lessons?.find(l => !completedLessons.includes(l.id))
   const firstLesson     = module.lessons?.[0]

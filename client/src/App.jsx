@@ -1,33 +1,37 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { lazy, Suspense } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import AppLayout from './components/Layout/AppLayout.jsx'
-import Dashboard from './pages/Dashboard/Dashboard.jsx'
-import Trilha from './pages/Trilha/Trilha.jsx'
-import Licao from './pages/Licao/Licao.jsx'
-import Quiz from './pages/Quiz/Quiz.jsx'
-import QuizReview from './pages/Quiz/QuizReview.jsx'
-import Glossario from './pages/Glossario.jsx'
-import Simulador from './pages/Simulador/Simulador.jsx'
-import Meta from './pages/Meta/Meta.jsx'
-import Fluxo from './pages/Fluxo/Fluxo.jsx'
-import Notas from './pages/Notas/Notas.jsx'
-import NotFound from './pages/NotFound.jsx'
+import Spinner from './components/Spinner.jsx'
+
+const Dashboard   = lazy(() => import('./pages/Dashboard/Dashboard.jsx'))
+const Trilha      = lazy(() => import('./pages/Trilha/Trilha.jsx'))
+const Licao       = lazy(() => import('./pages/Licao/Licao.jsx'))
+const Quiz        = lazy(() => import('./pages/Quiz/Quiz.jsx'))
+const QuizReview  = lazy(() => import('./pages/Quiz/QuizReview.jsx'))
+const Glossario   = lazy(() => import('./pages/Glossario.jsx'))
+const Simulador   = lazy(() => import('./pages/Simulador/Simulador.jsx'))
+const Meta        = lazy(() => import('./pages/Meta/Meta.jsx'))
+const Fluxo       = lazy(() => import('./pages/Fluxo/Fluxo.jsx'))
+const Notas       = lazy(() => import('./pages/Notas/Notas.jsx'))
+const NotFound    = lazy(() => import('./pages/NotFound.jsx'))
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<AppLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="trilha" element={<Trilha />} />
-          <Route path="licao/:id" element={<Licao />} />
-          <Route path="quiz/:modulo" element={<Quiz />} />
-          <Route path="quiz/:modulo/revisao" element={<QuizReview />} />
-          <Route path="glossario" element={<Glossario />} />
-          <Route path="simulador" element={<Simulador />} />
-          <Route path="meta" element={<Meta />} />
-          <Route path="fluxo" element={<Fluxo />} />
-          <Route path="notas" element={<Notas />} />
-          <Route path="*" element={<NotFound />} />
+          <Route index element={<Suspense fallback={<Spinner />}><Dashboard /></Suspense>} />
+          <Route path="trilha" element={<Suspense fallback={<Spinner />}><Trilha /></Suspense>} />
+          <Route path="licao/:id" element={<Suspense fallback={<Spinner />}><Licao /></Suspense>} />
+          <Route path="quiz/:modulo" element={<Suspense fallback={<Spinner />}><Quiz /></Suspense>} />
+          <Route path="quiz/:modulo/revisao" element={<Suspense fallback={<Spinner />}><QuizReview /></Suspense>} />
+          <Route path="glossario" element={<Suspense fallback={<Spinner />}><Glossario /></Suspense>} />
+          <Route path="simulador" element={<Suspense fallback={<Spinner />}><Simulador /></Suspense>} />
+          <Route path="meta" element={<Suspense fallback={<Spinner />}><Meta /></Suspense>} />
+          <Route path="fluxo" element={<Suspense fallback={<Spinner />}><Fluxo /></Suspense>} />
+          <Route path="notas" element={<Suspense fallback={<Spinner />}><Notas /></Suspense>} />
+          <Route path="anotacoes" element={<Navigate to="/notas" replace />} />
+          <Route path="*" element={<Suspense fallback={<Spinner />}><NotFound /></Suspense>} />
         </Route>
       </Routes>
     </BrowserRouter>

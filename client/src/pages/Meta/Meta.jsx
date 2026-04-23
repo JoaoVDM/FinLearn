@@ -1,16 +1,13 @@
-import { useState, useMemo, useCallback } from 'react'
-import { Check, Plus, Pencil, Trash2, Target, TrendingUp, Clock } from 'lucide-react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
+import { Check, Plus, Pencil, Trash2, Target, TrendingUp, Clock, Loader } from 'lucide-react'
 import { calcRequiredMonthly, runCompound, convertRate } from '../../utils/finance.js'
 import { fmtCurrency } from '../../utils/format.js'
+import { getGoals, addGoal, updateGoal, deleteGoal } from '../../services/api.js'
+import { showToast } from '../../components/Toast.jsx'
 import CompoundChart from '../Simulador/CompoundChart.jsx'
 import ConfirmDialog from '../../components/ConfirmDialog.jsx'
+import Spinner from '../../components/Spinner.jsx'
 
-function loadGoals() {
-  try { return JSON.parse(localStorage.getItem('fl_goals') || '[]') } catch { return [] }
-}
-function persistGoals(list) {
-  try { localStorage.setItem('fl_goals', JSON.stringify(list)) } catch {}
-}
 function rateMonthly(g) {
   return g.rateMode === 'year' ? convertRate(g.rate, 'year', 'month') : g.rate
 }
@@ -39,26 +36,47 @@ const EMPTY_FORM = { name: '', goal: 100000, initial: 1000, rate: 0.9, months: 1
 
 function SavedInput({ goalId, initialValue, onSave }) {
   const [val, setVal] = useState(initialValue)
+  const [busy, setBusy] = useState(false)
+
+  useEffect(() => { setVal(initialValue) }, [initialValue])
+
+  const handleSave = async () => {
+    if (val === initialValue) return
+    setBusy(true)
+    await onSave(goalId, val)
+    setBusy(false)
+  }
+
   return (
     <div className="sim-input-prefix" style={{ marginTop: 6 }}>
       <span>R$</span>
       <input
         type="number" className="input" min={0} value={val}
         onChange={e => setVal(+e.target.value)}
-        onBlur={() => onSave(goalId, val)}
-        onKeyDown={e => e.key === 'Enter' && onSave(goalId, val)}
+        onBlur={handleSave}
+        onKeyDown={e => e.key === 'Enter' && handleSave()}
+        disabled={busy}
       />
     </div>
   )
 }
 
 export default function Meta() {
-  const [goals, setGoals] = useState(loadGoals)
+  const [goals, setGoals] = useState([])
+  const [loading, setLoading] = useState(true)
   const [form, setForm] = useState(EMPTY_FORM)
   const [rateMode, setRateMode] = useState('month')
   const [editId, setEditId] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(null)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    getGoals().then(data => {
+      if (!data.error) setGoals(Array.isArray(data) ? data : [])
+      setLoading(false)
+    })
+  }, [])
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
@@ -78,17 +96,26 @@ export default function Meta() {
     setRateMode(next)
   }
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     if (!form.name.trim() || form.goal <= 0) return
+    setSaving(true)
+    const payload = { ...form, rateMode }
+
     if (editId) {
-      const updated = goals.map(g => g.id === editId ? { ...g, ...form, rateMode } : g)
-      setGoals(updated); persistGoals(updated)
+      const res = await updateGoal(editId, payload)
+      setSaving(false)
+      if (res.error) { showToast(res.message || 'Erro ao atualizar meta', 'error'); return }
+      setGoals(prev => prev.map(g => g.id === editId ? res.goal : g))
+      showToast('Meta atualizada')
     } else {
-      const updated = [...goals, { ...form, id: Date.now(), rateMode, createdAt: new Date().toISOString() }]
-      setGoals(updated); persistGoals(updated)
+      const res = await addGoal(payload)
+      setSaving(false)
+      if (res.error) { showToast(res.message || 'Erro ao criar meta', 'error'); return }
+      setGoals(prev => [...prev, res.goal])
+      showToast('Meta criada')
     }
     setForm(EMPTY_FORM); setRateMode('month'); setEditId(null); setShowForm(false)
-  }, [form, rateMode, editId, goals])
+  }, [form, rateMode, editId])
 
   const handleEdit = (g) => {
     setForm({ name: g.name, goal: g.goal, initial: g.initial, rate: g.rate, months: g.months, skipPerYear: g.skipPerYear, currentSaved: g.currentSaved || 0 })
@@ -97,19 +124,27 @@ export default function Meta() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleDelete = useCallback(() => {
-    const updated = goals.filter(g => g.id !== confirmDelete)
-    setGoals(updated); persistGoals(updated); setConfirmDelete(null)
-  }, [goals, confirmDelete])
+  const handleDelete = useCallback(async () => {
+    const res = await deleteGoal(confirmDelete)
+    if (res.error) { showToast(res.message || 'Erro ao remover meta', 'error'); setConfirmDelete(null); return }
+    setGoals(prev => prev.filter(g => g.id !== confirmDelete))
+    setConfirmDelete(null)
+    showToast('Meta removida')
+  }, [confirmDelete])
 
-  const updateSaved = useCallback((id, val) => {
-    const updated = goals.map(g => g.id === id ? { ...g, currentSaved: val } : g)
-    setGoals(updated); persistGoals(updated)
+  const updateSaved = useCallback(async (id, val) => {
+    const goal = goals.find(g => g.id === id)
+    if (!goal) return
+    const res = await updateGoal(id, { ...goal, currentSaved: val })
+    if (res.error) { showToast('Erro ao atualizar valor', 'error'); return }
+    setGoals(prev => prev.map(g => g.id === id ? res.goal : g))
   }, [goals])
 
   const totalTarget = goals.reduce((s, g) => s + g.goal, 0)
   const totalSaved  = goals.reduce((s, g) => s + (g.currentSaved || 0), 0)
   const overallPct  = totalTarget > 0 ? Math.min(100, Math.round(totalSaved / totalTarget * 100)) : 0
+
+  if (loading) return <Spinner />
 
   return (
     <div className="page-content fade-in">
@@ -136,7 +171,6 @@ export default function Meta() {
         </button>
       </div>
 
-      {/* ── Banner resumo ── */}
       {goals.length > 0 && (
         <div className="meta-summary-banner">
           <div className="meta-summary-item">
@@ -163,7 +197,6 @@ export default function Meta() {
         </div>
       )}
 
-      {/* ── Formulário ── */}
       {showForm && (
         <div className="meta-calc-section">
           <div className="meta-calc-header">
@@ -171,7 +204,6 @@ export default function Meta() {
             <button className="btn btn-ghost btn-sm" onClick={() => { setShowForm(false); setEditId(null); setForm(EMPTY_FORM) }}>Cancelar</button>
           </div>
           <div className="sim-layout">
-            {/* Coluna esquerda */}
             <div className="sim-form card">
               <p className="sim-form-title">Parâmetros</p>
 
@@ -250,13 +282,15 @@ export default function Meta() {
                 className="btn btn-primary w-full"
                 style={{ marginTop: 16 }}
                 onClick={handleSave}
-                disabled={!form.name.trim() || form.goal <= 0}
+                disabled={!form.name.trim() || form.goal <= 0 || saving}
               >
-                <Check size={14} /> {editId ? 'Salvar alterações' : 'Criar meta'}
+                {saving
+                  ? <><Loader size={14} style={{ animation: 'spin 0.8s linear infinite' }} /> Salvando...</>
+                  : <><Check size={14} /> {editId ? 'Salvar alterações' : 'Criar meta'}</>
+                }
               </button>
             </div>
 
-            {/* Coluna direita */}
             <div className="sim-results">
               {rows.length > 0 && (
                 <>
@@ -290,7 +324,6 @@ export default function Meta() {
         </div>
       )}
 
-      {/* ── Lista de metas ── */}
       {goals.length === 0 && !showForm ? (
         <div className="empty-state-box" style={{ marginTop: 40 }}>
           <Target size={40} style={{ color: 'var(--text-3)', marginBottom: 12 }} />
@@ -359,7 +392,7 @@ export default function Meta() {
 
                   <div className="meta-goal-update">
                     <label>Atualizar acumulado</label>
-                    <SavedInput key={g.id + '-' + saved} goalId={g.id} initialValue={saved} onSave={updateSaved} />
+                    <SavedInput key={g.id} goalId={g.id} initialValue={saved} onSave={updateSaved} />
                   </div>
                 </div>
               )

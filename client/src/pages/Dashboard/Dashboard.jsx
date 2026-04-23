@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Play, BookCheck, BarChart2, Trophy, Calculator, Target, Wallet, BookMarked, RotateCcw, Rocket } from 'lucide-react'
 import { useProgress } from '../../context/ProgressContext.jsx'
-import { getModules } from '../../services/api.js'
 import { showToast } from '../../components/Toast.jsx'
 import ConfirmDialog from '../../components/ConfirmDialog.jsx'
 import ModuleCard from './ModuleCard.jsx'
@@ -15,36 +14,32 @@ const TOOLS = [
   { to: '/glossario', Icon: BookMarked, label: 'Glossário',            desc: 'Termos do mercado financeiro'       },
 ]
 
+function getGreeting(percent) {
+  if (percent === 0) return { title: 'Bem-vindo ao FinLearn', subtitle: 'Sua jornada de educação financeira começa aqui.' }
+  if (percent === 100) return { title: 'Parabéns, jornada concluída!', subtitle: 'Você dominou toda a trilha. Continue praticando com as ferramentas.' }
+  if (percent >= 75) return { title: 'Quase lá!', subtitle: `Você está em ${percent}% da trilha — a reta final te espera.` }
+  if (percent >= 50) return { title: 'Ótimo progresso!', subtitle: `Você já completou mais da metade da trilha (${percent}%). Continue!` }
+  return { title: 'Bem-vindo de volta!', subtitle: `Você completou ${percent}% da trilha. Continue de onde parou.` }
+}
+
 export default function Dashboard() {
   const { progress, resetProgress } = useProgress()
-  const [modules, setModules] = useState([])
-  const [loading, setLoading] = useState(true)
   const [confirmReset, setConfirmReset] = useState(false)
-  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    try { return !localStorage.getItem('fl_onboarding_seen') } catch { return false }
+  })
 
-  useEffect(() => {
-    getModules().then(data => {
-      setModules(Array.isArray(data) ? data : [])
-      setLoading(false)
-    })
-  }, [])
-
-  useEffect(() => {
-    if (progress && progress.completedLessons?.length === 0) {
-      let seen; try { seen = localStorage.getItem('fl_onboarding_seen') } catch {}
-      if (!seen) setShowOnboarding(true)
-    }
-  }, [progress])
-
-  if (!progress || loading) return <Spinner />
+  if (!progress) return <Spinner />
 
   const totalLessons   = progress.modulesProgress?.reduce((a, m) => a + m.total, 0) || 0
   const completedCount = progress.completedLessons?.length || 0
   const overallPercent = totalLessons ? Math.round(completedCount / totalLessons * 100) : 0
   const quizzesDone    = Object.keys(progress.quizScores || {}).length
 
+  const { title: heroTitle, subtitle: heroSubtitle } = getGreeting(overallPercent)
+
   let continueLink = '/trilha'
-  for (const mod of modules) {
+  for (const mod of progress.modulesProgress || []) {
     const inc = mod.lessons?.find(l => !progress.completedLessons?.includes(l.id))
     if (inc) { continueLink = `/licao/${inc.id}`; break }
   }
@@ -72,7 +67,7 @@ export default function Dashboard() {
         onCancel={() => setConfirmReset(false)}
       />
 
-      {showOnboarding && (
+      {showOnboarding && overallPercent === 0 && (
         <div className="alert alert-success">
           <Rocket size={22} className="alert-icon" color="var(--accent)" />
           <div className="alert-body">
@@ -91,8 +86,8 @@ export default function Dashboard() {
       )}
 
       <div className="hero-section">
-        <h1 className="hero-title">Bem-vindo ao FinLearn</h1>
-        <p className="hero-subtitle">Sua jornada de educação financeira</p>
+        <h1 className="hero-title">{heroTitle}</h1>
+        <p className="hero-subtitle">{heroSubtitle}</p>
 
         <div className="hero-stats">
           <div className="stat-item">
@@ -109,7 +104,7 @@ export default function Dashboard() {
           </div>
           <div className="stat-item">
             <span className="stat-value">
-              <Trophy size={18} /> {quizzesDone}/{modules.length}
+              <Trophy size={18} /> {quizzesDone}/{(progress.modulesProgress || []).length}
             </span>
             <span className="stat-label">Quizzes feitos</span>
           </div>
@@ -124,7 +119,7 @@ export default function Dashboard() {
 
         <div className="button-group">
           <Link to={continueLink} className="btn btn-primary">
-            <Play size={15} /> Continuar Estudando
+            <Play size={15} /> {overallPercent === 100 ? 'Revisar Trilha' : 'Continuar Estudando'}
           </Link>
         </div>
         <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-3)', marginTop: 12 }}>
@@ -138,23 +133,17 @@ export default function Dashboard() {
           Resumo do seu progresso em cada módulo. Acesse a <Link to="/trilha" style={{ color: 'var(--accent)' }}>Trilha</Link> para ver as lições detalhadas.
         </p>
         <div className="modules-grid">
-          {modules.map(mod => {
-            const mp = progress.modulesProgress?.find(m => m.id === mod.id)
-            const qs = progress.quizScores?.[mod.id]
-            return (
-              <ModuleCard
-                key={mod.id}
-                module={mod}
-                moduleProgress={mp}
-                quizScore={qs}
-                completedLessons={progress.completedLessons || []}
-              />
-            )
-          })}
+          {(progress.modulesProgress || []).map(mod => (
+            <ModuleCard
+              key={mod.id}
+              module={mod}
+              completedLessons={progress.completedLessons || []}
+            />
+          ))}
         </div>
       </section>
 
-      <section style={{ marginTop: 40 }}>
+      <section style={{ marginTop: 'var(--space-10)' }}>
         <h2 className="section-title">Ferramentas</h2>
         <div className="quick-links-grid">
           {TOOLS.map(({ to, Icon, label, desc }) => (
@@ -171,7 +160,7 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <div style={{ marginTop: 48, paddingTop: 24, borderTop: '1px solid var(--border)', textAlign: 'right' }}>
+      <div style={{ marginTop: 'var(--space-12)', paddingTop: 'var(--space-6)', borderTop: '1px solid var(--border)', textAlign: 'right' }}>
         <button
           className="btn btn-ghost"
           style={{ fontSize: '0.8rem', color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: 6 }}

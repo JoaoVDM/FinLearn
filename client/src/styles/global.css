@@ -24,6 +24,13 @@
   --accent-glow-strong: rgba(0,229,180,0.26);
   --accent-muted:       rgba(0,229,180,0.07);
 
+  /* Transaction type colors */
+  --color-receita:      #818cf8;
+  --color-receita-dim:  rgba(129,140,248,0.12);
+
+  /* Interaction */
+  --bg-hover:           rgba(255,255,255,0.05);
+
   /* Semantic */
   --success:     #00e5b4;
   --success-dim: rgba(0,229,180,0.10);
@@ -126,6 +133,10 @@ html[data-theme="light"] {
   --shadow-md: 0 8px 28px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.07);
   --shadow-lg: 0 20px 60px rgba(0,0,0,0.16), 0 6px 16px rgba(0,0,0,0.09);
   --shadow-accent: 0 0 28px rgba(0,184,148,0.16);
+
+  --color-receita:     #6366f1;
+  --color-receita-dim: rgba(99,102,241,0.12);
+  --bg-hover:          rgba(0,0,0,0.04);
 }
 
 /* ─── RESET ─────────────────────────────────────────────── */
@@ -235,7 +246,7 @@ html[data-theme="light"] .sidebar { background: #05080f; border-right-color: rgb
 .logo-sub {
   font-size: 0.62rem;
   font-weight: 500;
-  color: rgba(232,240,254,0.30);
+  color: rgba(232,240,254,0.42);
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
@@ -823,26 +834,7 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 .empty-state-title { font-size: var(--text-base); font-weight: 600; color: var(--text-2); margin-bottom: 4px; }
 .empty-state-desc  { font-size: var(--text-sm); color: var(--text-3); max-width: 320px; line-height: 1.5; }
 
-/* ─── TOAST ─────────────────────────────────────────────── */
-.toast {
-  position: fixed;
-  bottom: 28px; right: 28px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-lg);
-  padding: 13px 20px;
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--text-1);
-  box-shadow: var(--shadow-lg);
-  z-index: 9999;
-  animation: slideUpToast 0.3s cubic-bezier(.34,1.56,.64,1);
-  min-width: 220px;
-}
-
-.toast-success { border-left: 3px solid var(--accent); }
-.toast-error   { border-left: 3px solid var(--danger); }
-
+/* ─── TOAST (animação compartilhada) ────────────────────── */
 @keyframes slideUpToast {
   from { transform: translateY(60px); opacity: 0; }
   to   { transform: translateY(0); opacity: 1; }
@@ -920,14 +912,6 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   box-shadow: var(--shadow-md);
 }
 
-.hero-section::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--accent), rgba(0,229,180,0.3) 60%, transparent 100%);
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-}
 
 .hero-section::after {
   content: '';
@@ -1131,8 +1115,8 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 /* ─── QUICK LINKS ───────────────────────────────────────── */
 .quick-links-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-3);
 }
 
 .quick-link-card {
@@ -2018,7 +2002,7 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 
 .transaction-icon.gasto        { background: var(--danger-dim); color: var(--danger); }
 .transaction-icon.investimento { background: var(--success-dim); color: var(--accent); }
-.transaction-icon.receita      { background: rgba(99,102,241,0.12); color: rgb(99,102,241); }
+.transaction-icon.receita      { background: var(--color-receita-dim); color: var(--color-receita); }
 .transaction-info { flex: 1; min-width: 0; }
 
 .transaction-title {
@@ -2035,7 +2019,7 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 }
 .transaction-value.gasto        { color: var(--danger); }
 .transaction-value.investimento { color: var(--accent); }
-.transaction-value.receita      { color: rgb(99,102,241); }
+.transaction-value.receita      { color: var(--color-receita); }
 
 .btn-delete {
   color: var(--text-3); background: none; border: none; cursor: pointer;
@@ -2057,7 +2041,6 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   background: var(--bg-surface);
-  border-top: 3px solid var(--border-strong);
   box-shadow: 0 1px 3px rgba(0,0,0,0.25);
   transition: transform var(--transition), box-shadow var(--transition);
 }
@@ -2066,12 +2049,6 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   transform: translateY(-2px);
   box-shadow: var(--shadow);
 }
-
-.summary-card.receitas  { border-top-color: rgb(99,102,241); }
-.summary-card.gastos    { border-top-color: var(--danger); }
-.summary-card.investimentos { border-top-color: var(--accent); }
-.summary-card.saldo     { border-top-color: var(--warning); }
-.summary-card.positive  { border-top-color: var(--accent); }
 
 .summary-card-label {
   display: flex; align-items: center; gap: 6px;
@@ -2089,11 +2066,6 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-.summary-card.gastos        { border-top-color: var(--danger); }
-.summary-card.investimentos { border-top-color: var(--accent); }
-.summary-card.saldo         { border-top-color: var(--warning); }
-.summary-card.saldo.positive{ border-top-color: var(--accent); }
 
 .summary-card.gastos        .summary-card-value { color: var(--danger); }
 .summary-card.investimentos .summary-card-value { color: var(--accent); }
@@ -2210,15 +2182,7 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
 }
-.lesson-note-header {
-  display: flex; align-items: center; gap: 8px;
-  font-size: var(--text-sm); font-weight: 600;
-  color: var(--text-2); margin-bottom: 10px;
-}
-.lesson-note-saved {
-  margin-left: auto; font-size: var(--text-xs);
-  color: var(--accent); font-weight: 500;
-}
+/* lesson-note-header e lesson-note-saved definidos na seção de adições abaixo */
 .lesson-note-textarea {
   width: 100%; box-sizing: border-box;
   background: var(--bg-input);
@@ -2321,19 +2285,7 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 
 .nota-lesson-link:hover { color: var(--accent); }
 
-.nota-card-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.nota-saved-indicator {
-  font-size: var(--text-xs);
-  color: var(--accent);
-  font-weight: 500;
-  white-space: nowrap;
-}
+/* nota-card-actions e nota-saved-indicator definidos na seção de adições abaixo */
 
 .nota-card-textarea {
   width: 100%;
@@ -2408,7 +2360,7 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 .evolution-chart-title {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-1);
 }
 .evolution-period-tabs {
   display: flex;
@@ -2419,12 +2371,12 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   border-radius: 20px;
   border: 1px solid var(--border-md);
   background: transparent;
-  color: var(--text-muted);
+  color: var(--text-3);
   font-size: 0.75rem;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
-.evolution-tab:hover { background: var(--bg-elevated); color: var(--text-secondary); }
+.evolution-tab:hover { background: var(--bg-elevated); color: var(--text-2); }
 .evolution-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
 /* ─── BUDGET MANAGER ────────────────────────────────────── */
@@ -2573,18 +2525,18 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 .budget-item-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .budget-display-row { display: flex; align-items: center; gap: 6px; }
 .budget-edit-row { display: flex; align-items: center; gap: 4px; }
-.budget-spent { font-size: 0.82rem; font-weight: 600; color: var(--text-primary); }
+.budget-spent { font-size: 0.82rem; font-weight: 600; color: var(--text-1); }
 .budget-spent.over { color: var(--danger); }
-.budget-limit { font-size: 0.75rem; color: var(--text-muted); }
-.budget-edit-prefix { font-size: 0.78rem; color: var(--text-muted); }
+.budget-limit { font-size: 0.75rem; color: var(--text-3); }
+.budget-edit-prefix { font-size: 0.78rem; color: var(--text-3); }
 .budget-edit-input {
   width: 90px;
   padding: 3px 7px;
   font-size: 0.82rem;
   border: 1px solid var(--border-md);
   border-radius: 6px;
-  background: var(--bg-card);
-  color: var(--text-primary);
+  background: var(--bg-surface);
+  color: var(--text-1);
 }
 .budget-icon-btn {
   display: flex;
@@ -2595,11 +2547,11 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   border-radius: 6px;
   border: 1px solid var(--border-md);
   background: transparent;
-  color: var(--text-muted);
+  color: var(--text-3);
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
-.budget-icon-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
+.budget-icon-btn:hover { background: var(--bg-elevated); color: var(--text-1); }
 .budget-icon-btn.accent:hover { color: var(--accent); border-color: var(--accent); }
 .budget-icon-btn.danger:hover { color: var(--danger); border-color: var(--danger); }
 .budget-bar-track {
@@ -2629,12 +2581,12 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 .recurring-title {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-1);
   display: block;
 }
 .recurring-sub {
   font-size: 0.72rem;
-  color: var(--text-muted);
+  color: var(--text-3);
   display: block;
 }
 .recurring-form {
@@ -2648,7 +2600,7 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 }
 .recurring-empty {
   font-size: 0.82rem;
-  color: var(--text-muted);
+  color: var(--text-3);
   text-align: center;
   padding: 12px 0;
 }
@@ -2672,11 +2624,11 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 }
 .recurring-type-dot.gasto        { background: var(--danger); }
 .recurring-type-dot.investimento { background: var(--accent); }
-.recurring-type-dot.receita      { background: rgb(99,102,241); }
+.recurring-type-dot.receita      { background: var(--color-receita); }
 .recurring-item-desc {
   font-size: 0.82rem;
   font-weight: 500;
-  color: var(--text-primary);
+  color: var(--text-1);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2697,7 +2649,7 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
 }
 .recurring-item-value.gasto        { color: var(--danger); }
 .recurring-item-value.investimento { color: var(--accent); }
-.recurring-item-value.receita      { color: rgb(99,102,241); }
+.recurring-item-value.receita      { color: var(--color-receita); }
 .recurring-item-type { font-size: 0.7rem; color: var(--text-3); }
 
 /* ─── EMPTY ─────────────────────────────────────────────── */
@@ -3019,6 +2971,7 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   .sim-form   { position: static; top: auto; }
   .sim-stats-grid { grid-template-columns: repeat(3, 1fr); }
   .modules-grid { grid-template-columns: 1fr; }
+  .quick-links-grid { grid-template-columns: repeat(2, 1fr); }
   .fluxo-layout { grid-template-columns: 1fr; }
   .fluxo-col-left, .fluxo-col-right { gap: 12px; }
   .fluxo-filter-select { max-width: none; }
@@ -3047,6 +3000,7 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   .glossary-grid { grid-template-columns: 1fr; }
   .meta-goals-grid { grid-template-columns: 1fr; }
   .meta-summary-banner { grid-template-columns: repeat(2, 1fr); }
+  .summary-cards { grid-template-columns: repeat(2, 1fr); }
   .quiz-card { padding: 20px; }
 }
 
@@ -3181,3 +3135,152 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
   .search-backdrop { padding-top: 20px; align-items: flex-start; }
   .search-footer { display: none; }
 }
+
+/* ─── TOAST CONTAINER (fila) ────────────────────────────────────────────────── */
+.toast-container {
+  position: fixed;
+  bottom: 28px; right: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 9999;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-1);
+  box-shadow: var(--shadow-lg);
+  min-width: 220px;
+  max-width: 360px;
+  animation: slideUpToast 0.3s cubic-bezier(.34,1.56,.64,1);
+}
+
+.toast-message { flex: 1; }
+
+.toast-dismiss {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+.toast-dismiss:hover { color: var(--text-1); background: rgba(255,255,255,0.07); }
+
+.toast-success { border-left: 3px solid var(--accent); }
+.toast-error   { border-left: 3px solid var(--danger); }
+
+@media (max-width: 479px) {
+  .toast-container { left: 12px; right: 12px; bottom: 16px; }
+  .toast { max-width: none; }
+}
+
+/* ─── FIELD ERROR / INPUT STATES ─────────────────────────────────────────────── */
+.field-error {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--danger);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.input-error {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 3px var(--danger-dim) !important;
+}
+
+/* ─── CHAR COUNTER ──────────────────────────────────────────────────────────── */
+.nota-char-count {
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
+}
+
+/* ─── TRANSACTION FORM: header row ──────────────────────────────────────────── */
+.transaction-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 8px;
+}
+.transaction-form-header .transaction-form-title { margin: 0; }
+
+/* ─── TRANSACTION ITEM: edit state + edit button ────────────────────────────── */
+.transaction-item.editing {
+  border-color: var(--accent);
+  background: var(--accent-muted);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.btn-icon-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+.btn-icon-action:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-muted);
+}
+.btn-icon-action.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-muted);
+}
+
+/* ─── LESSON NOTES + NOTAS CARD ─────────────────────────────────────────────── */
+.lesson-note-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-2);
+}
+.lesson-note-saved {
+  font-size: var(--text-xs);
+  color: var(--accent);
+  font-weight: 500;
+}
+.nota-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.nota-saved-indicator {
+  font-size: var(--text-xs);
+  color: var(--accent);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ─── SEARCH HOVER FIX ───────────────────────────────────────────────────────── */
+.search-result-item:hover,
+.search-result-item.active { background: var(--bg-hover); }
+.search-clear:hover { background: var(--bg-hover); }

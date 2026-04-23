@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 
 const ThemeContext = createContext()
 
@@ -7,11 +7,12 @@ export function ThemeProvider({ children }) {
     try { return localStorage.getItem('fl_theme') || 'dark' } catch { return 'dark' }
   })
 
+  useEffect(() => { document.documentElement.dataset.theme = theme }, [theme])
+
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark'
     setTheme(next)
     try { localStorage.setItem('fl_theme', next) } catch {}
-    document.documentElement.dataset.theme = next
   }
 
   return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>

@@ -81,7 +81,7 @@ export default function Quiz() {
         refreshProgress()
       })
     }
-  }, [state.done])
+  }, [state.done, state.questions, state.answers, modulo, refreshProgress])
 
   if (state.loading) return <Spinner />
 
