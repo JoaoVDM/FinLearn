@@ -68,6 +68,8 @@ export default function GlobalSearch() {
     return () => window.removeEventListener('keydown', handler)
   }, [open])
 
+  useEffect(() => () => clearTimeout(debounceRef.current), [])
+
   const doSearch = useCallback((q) => {
     clearTimeout(debounceRef.current)
     if (!q || q.length < 2) { setResults([]); setLoading(false); return }
@@ -133,7 +135,7 @@ export default function GlobalSearch() {
             )}
             {!loading && results.map((item, i) => (
               <button
-                key={i}
+                key={item.type === 'glossary' ? `glossary-${item.term}` : `${item.type}-${item.id || item.lessonId}`}
                 className={`search-result-item${i === active ? ' active' : ''}`}
                 onClick={() => go(item)}
                 onMouseEnter={() => setActive(i)}

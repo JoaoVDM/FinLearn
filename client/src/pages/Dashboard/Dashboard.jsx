@@ -92,21 +92,21 @@ export default function Dashboard() {
         <div className="hero-stats">
           <div className="stat-item">
             <span className="stat-value">
-              <BookCheck size={18} /> {completedCount}/{totalLessons}
+              {completedCount}<span className="stat-denom">/{totalLessons}</span>
             </span>
-            <span className="stat-label">Lições concluídas</span>
+            <span className="stat-label"><BookCheck size={11} /> Lições concluídas</span>
           </div>
           <div className="stat-item">
             <span className="stat-value">
-              <BarChart2 size={18} /> {overallPercent}%
+              {overallPercent}<span className="stat-denom">%</span>
             </span>
-            <span className="stat-label">Progresso geral</span>
+            <span className="stat-label"><BarChart2 size={11} /> Progresso geral</span>
           </div>
           <div className="stat-item">
             <span className="stat-value">
-              <Trophy size={18} /> {quizzesDone}/{(progress.modulesProgress || []).length}
+              {quizzesDone}<span className="stat-denom">/{(progress.modulesProgress || []).length}</span>
             </span>
-            <span className="stat-label">Quizzes feitos</span>
+            <span className="stat-label"><Trophy size={11} /> Quizzes feitos</span>
           </div>
         </div>
 

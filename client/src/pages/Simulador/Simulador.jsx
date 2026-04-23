@@ -201,7 +201,7 @@ export default function Simulador() {
       </div>
 
       {scenarios.length > 0 && (
-        <section style={{ marginTop: 40 }}>
+        <section style={{ marginTop: 'var(--space-10)' }}>
           <h2 className="section-title">Comparação de cenários</h2>
           <div className="sim-scenarios-grid">
             {scenarios.map(s => (
